@@ -1,17 +1,11 @@
-# CMakeLists.txt for libRootFftwWrapper.
-# 
 cmake_minimum_required(VERSION 3.19)
+project(RootFftwWrapper VERSION 3.0.1)
 
-project(RootFftwWrapper)
 set(libname "RootFftwWrapper")
 set(compatlibname "RootFftwWrapperCompat")
 
-set (LIBRARY_VERSION_MAJOR 3)
-set (LIBRARY_VERSION_MINOR 0)
-set (LIBRARY_VERSION_PATCH 1)
-set (LIBRARY_VERSION_STRING ${LIBRARY_VERSION_MAJOR}.${LIBRARY_VERSION_MINOR}.${LIBRARY_VERSION_PATCH})
 set (VECTORDIR vectorclass) 
- 
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 # You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
@@ -81,8 +75,8 @@ ROOT_GENERATE_DICTIONARY(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} LINKDEF
 
 #---Create a shared library with geneated dictionary
 add_library(${libname} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
-set_target_properties(${libname} PROPERTIES VERSION ${LIBRARY_VERSION_STRING}
-  SOVERSION ${LIBRARY_VERSION_MAJOR})
+set_target_properties(${libname} PROPERTIES VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR})
 
 add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
 target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
@@ -135,7 +129,7 @@ if(DEFINED ENV{PUEO_UTIL_INSTALL_DIR})
     set(INC_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/include)
     do_install()
 endif()
-    
+
 if(DEFINED ENV{ANITA_UTIL_INSTALL_DIR})
     message("ANITA_UTIL_INSTALL_DIR is set to $ENV{ANITA_UTIL_INSTALL_DIR}")
     set(UTIL_LIB_DIR $ENV{ANITA_UTIL_INSTALL_DIR}/lib)
@@ -168,7 +162,7 @@ if(DEFINED ENV{RNO_G_INSTALL_DIR})
     set(INC_UTIL $ENV{RNO_G_INSTALL_DIR}/include)
     do_install()
 endif()
- 
+
 if(NOT DEFINED UTIL_LIB_DIR)
     message("No environmental installation directory exists, will install to /usr/local")
     set(UTIL_LIB_DIR /usr/local/lib)
@@ -323,7 +317,7 @@ option ( FORCE_OLD_GPP_ABI " Force old g++ ABI; this might be necessary if using
 if (FORCE_OLD_GPP_ABI) 
   add_definitions( -D_GLIBCXX_USE_CXX11_ABI=0 ) 
 endif() 
-    
+
 
 
 ### Let's see if this works 
