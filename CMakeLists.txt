@@ -44,9 +44,6 @@ endif()
 message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
 message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
 
-include_directories(${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS}
-  ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/${VECTORDIR}
-   ${FFTW_INCLUDES})
 add_definitions(${ROOT_CXX_FLAGS})
 
 file(GLOB HEADER_FILES
@@ -81,6 +78,11 @@ set_target_properties(${libname} PROPERTIES VERSION ${PROJECT_VERSION}
 add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
 target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
+target_include_directories(${PROJECT_NAME}
+  PRIVATE ${ROOT_INCLUDE_DIRS}
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include 
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass
+  PRIVATE ${FFTW_INCLUDES})
 
 #target_link_libraries(${libname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} MathMore Minuit2)
 target_link_libraries(${libname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
