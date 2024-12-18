@@ -17,23 +17,12 @@ message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
-
 # set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
 # set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
 
-set(DICTNAME G__${PROJECT_NAME})
-# set(DICTNAMECOMPAT G__${compatlibname})
-
-ROOT_GENERATE_DICTIONARY(${DICTNAME} ${HEADER_FILES} LINKDEF LinkDef.h OPTIONS
-  ${DICTIONARY_OPTIONS})
-# ROOT_GENERATE_DICTIONARY(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} LINKDEF
-#   LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
-
-#---Create a shared library with geneated dictionary
-add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR})
-
 # add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
@@ -47,10 +36,11 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 # target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
+set(DICTNAME G__${PROJECT_NAME})
+# set(DICTNAMECOMPAT G__${compatlibname})
 
-if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
-    add_custom_target(${DICTNAME}.pcm DEPENDS ${DICTNAME})
-endif()
+root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF LinkDef.h OPTIONS ${DICTIONARY_OPTIONS})
+# root_generate_dictionary(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} MODULE ${compatlibname} LINKDEF LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
 
 
 macro (do_install)
