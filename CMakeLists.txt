@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(RootFftwWrapper VERSION 3.0.1)
 
-set(libname "RootFftwWrapper")
-set(compatlibname "RootFftwWrapperCompat")
+# set(compatlibname "RootFftwWrapperCompat")
 
 set (VECTORDIR vectorclass) 
 
@@ -62,8 +61,8 @@ set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h
 
 
 
-set(DICTNAME G__${libname})
-set(DICTNAMECOMPAT G__${compatlibname})
+set(DICTNAME G__${PROJECT_NAME})
+# set(DICTNAMECOMPAT G__${compatlibname})
 
 ROOT_GENERATE_DICTIONARY(${DICTNAME} ${HEADER_FILES} LINKDEF LinkDef.h OPTIONS
   ${DICTIONARY_OPTIONS})
@@ -71,12 +70,12 @@ ROOT_GENERATE_DICTIONARY(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} LINKDEF
   LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
 
 #---Create a shared library with geneated dictionary
-add_library(${libname} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
-set_target_properties(${libname} PROPERTIES VERSION ${PROJECT_VERSION}
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR})
 
-add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
-target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
+# add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
+# target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE ${ROOT_INCLUDE_DIRS}
@@ -84,9 +83,10 @@ target_include_directories(${PROJECT_NAME}
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass
   PRIVATE ${FFTW_INCLUDES})
 
-#target_link_libraries(${libname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} MathMore Minuit2)
-target_link_libraries(${libname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
-target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+
+#target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} MathMore Minuit2)
+target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+# target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 
 if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
@@ -106,14 +106,14 @@ macro (do_install)
       install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
       install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/${VECTORDIR})
       install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
-      install (TARGETS ${libname} ${compatlibname} 
-      ARCHIVE DESTINATION ${UTIL_LIB_DIR}
-      LIBRARY DESTINATION ${UTIL_LIB_DIR}
-      RUNTIME DESTINATION ${UTIL_BIN_DIR})
+  # install (TARGETS ${PROJECT_NAME} ${compatlibname} 
+      # ARCHIVE DESTINATION ${UTIL_LIB_DIR}
+      # LIBRARY DESTINATION ${UTIL_LIB_DIR}
+      # RUNTIME DESTINATION ${UTIL_BIN_DIR})
       #Only needed for ROOT6
       if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
       	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
-	  #install (FILES ${PROJECT_BINARY_DIR}/lib${libname}.rootmap DESTINATION ${UTIL_LIB_DIR})
+    #install (FILES ${PROJECT_BINARY_DIR}/lib${PROJECT_NAME}.rootmap DESTINATION ${UTIL_LIB_DIR})
       endif() 
 endmacro()
 
@@ -184,7 +184,7 @@ endif()
 set (BINSRCDIR test) 
 macro( do_binary binary_name ) 
   add_executable(${binary_name} ${BINSRCDIR}/${binary_name}.cxx) 
-  target_link_libraries(${binary_name}  ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${libname})
+  target_link_libraries(${binary_name}  ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${PROJECT_NAME})
 endmacro() 
 
 do_binary(testFFTtools) 
@@ -279,7 +279,7 @@ elseif(USE_EIGEN)
 elseif(USE_ARMADILLO) 
 
   add_definitions( -DUSE_ARMADILLO) 
-  target_link_libraries(${libname} armadillo) 
+  target_link_libraries(${PROJECT_NAME} armadillo) 
 
 endif() 
 
