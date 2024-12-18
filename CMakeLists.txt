@@ -1,11 +1,35 @@
 cmake_minimum_required(VERSION 3.19)
 project(RootFftwWrapper VERSION 3.0.1)
 
+#================================================================================================
+#                                       HOUSEKEEPING
+#================================================================================================
+
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColourReset "${Esc}[m")
+  set(ColourBold  "${Esc}[1m")
+  set(Red         "${Esc}[31m")
+  set(Green       "${Esc}[32m")
+  set(Yellow      "${Esc}[33m")
+  set(Blue        "${Esc}[34m")
+  set(Magenta     "${Esc}[35m")
+  set(Cyan        "${Esc}[36m")
+  set(White       "${Esc}[37m")
+  set(BoldRed     "${Esc}[1;31m")
+  set(BoldGreen   "${Esc}[1;32m")
+  set(BoldYellow  "${Esc}[1;33m")
+  set(BoldBlue    "${Esc}[1;34m")
+  set(BoldMagenta "${Esc}[1;35m")
+  set(BoldCyan    "${Esc}[1;36m")
+  set(BoldWhite   "${Esc}[1;37m")
+endif()
+
 # set(compatlibname "RootFftwWrapperCompat")
 
 find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net Minuit Spectrum Minuit2)
-message("Found ROOT ${ROOT_VERSION}")
-message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
+message(STATUS "${BoldGreen}Found ROOT ${ROOT_VERSION}${ColourReset}")
+message(STATUS "${BoldGreen}ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}${ColourReset}")
 if( ${ROOT_VERSION} VERSION_LESS "6.16")
   message(FATAL_ERROR "Please update ROOT to at least 6.16")
 endif()
@@ -13,7 +37,12 @@ endif()
 # TODO: FFTW didn't ship with a finder?
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
-message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
+message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourReset}")
+
+
+#================================================================================================
+#                                       BUILDING
+#================================================================================================
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
@@ -21,16 +50,21 @@ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
 # set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION_MAJOR})
 # add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR})
+
 target_include_directories(${PROJECT_NAME}
-  PRIVATE ${ROOT_INCLUDE_DIRS}
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include 
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass
-  PRIVATE ${FFTW_INCLUDES})
+  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
+          $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
+  PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
+          $<BUILD_INTERFACE:${FFTW_INCLUDES}>
+)
 
 # TODO: do we really need to link all of the ROOT libraries?
 target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
@@ -43,6 +77,9 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 # root_generate_dictionary(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} MODULE ${compatlibname} LINKDEF LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
 
 
+#================================================================================================
+#                                       INSTALLING
+#================================================================================================
 macro (do_install)
       message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
       message("DICTNAME is set to ${DICTNAME}" )
