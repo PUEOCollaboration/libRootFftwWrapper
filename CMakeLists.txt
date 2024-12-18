@@ -10,11 +10,8 @@ find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net
 message("Found ROOT ${ROOT_VERSION}")
 message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
 
-if( ${ROOT_VERSION} VERSION_GREATER "5.99/99")
-    include(${ROOT_USE_FILE})
-else()
-#    include(RootNewMacros)
-     add_definitions(${ROOT_DEFINITIONS})	
+if( ${ROOT_VERSION} VERSION_LESS "6.16")
+  message(FATAL_ERROR "Please update ROOT to at least 6.16")
 endif()
 
 set (DICTIONARY_OPTIONS )
@@ -30,8 +27,6 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
 message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
-
-add_definitions(${ROOT_CXX_FLAGS})
 
 file(GLOB HEADER_FILES
     "include/*.h"    
