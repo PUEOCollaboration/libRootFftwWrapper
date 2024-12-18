@@ -5,26 +5,12 @@ project(RootFftwWrapper VERSION 3.0.1)
 
 set (VECTORDIR vectorclass) 
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
-
-# You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
-#   - ROOT built with classic configure/make use the provided $ROOTSYS/etc/cmake/FindROOT.cmake
-#   - ROOT built with CMake. Add in CMAKE_PREFIX_PATH the installation prefix for ROOT
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-
-
-
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
-find_package(ROOT REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net
-  Minuit Spectrum OPTIONAL_COMPONENTS Minuit2)
-find_package(FFTW REQUIRED)
+find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net Minuit Spectrum Minuit2)
+message("Found ROOT ${ROOT_VERSION}")
+message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
 
-#---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
-
-
-message("ROOT_VERSION is set to ${ROOT_VERSION}")
 if( ${ROOT_VERSION} VERSION_GREATER "5.99/99")
-    message("Using ROOT_VERSION 6")
     include(${ROOT_USE_FILE})
 else()
 #    include(RootNewMacros)
@@ -40,7 +26,9 @@ else()
   set (DICTIONARY_OPTIONS ${DICTIONARY_OPTIONS} -DDONT_HAVE_MINUIT2)
 endif()
 
-message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
+# TODO: FFTW didn't ship with a finder?
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+find_package(FFTW REQUIRED)
 message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
 
 add_definitions(${ROOT_CXX_FLAGS})
