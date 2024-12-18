@@ -3,37 +3,23 @@ project(RootFftwWrapper VERSION 3.0.1)
 
 # set(compatlibname "RootFftwWrapperCompat")
 
-set (VECTORDIR vectorclass) 
-
-#---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
 find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net Minuit Spectrum Minuit2)
 message("Found ROOT ${ROOT_VERSION}")
 message("ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}")
-
 if( ${ROOT_VERSION} VERSION_LESS "6.16")
   message(FATAL_ERROR "Please update ROOT to at least 6.16")
 endif()
 
 # TODO: FFTW didn't ship with a finder?
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
 message("FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
 
-file(GLOB HEADER_FILES
-    "include/*.h"    
-)
+file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
+file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
 
-file(GLOB_RECURSE SOURCE_FILES src/*.cxx)
-#file(GLOB_RECURSE THIS_LD LinkDef.h)
-
-# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx
-#   src/RFFilter.cxx ) 
-#
-# set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h
-#   include/RFSignal.h include/RFFilter.h ) 
-
-
-
+# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
+# set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
 
 set(DICTNAME G__${PROJECT_NAME})
 # set(DICTNAMECOMPAT G__${compatlibname})
@@ -57,9 +43,8 @@ target_include_directories(${PROJECT_NAME}
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass
   PRIVATE ${FFTW_INCLUDES})
 
-
-#target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} MathMore Minuit2)
-target_link_libraries(${PROJECT_NAME} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+# TODO: do we really need to link all of the ROOT libraries?
+target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 # target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 
@@ -78,7 +63,7 @@ macro (do_install)
       file (GLOB VCL_FILES "vectorclass/*.h") 
 
       install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
-      install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/${VECTORDIR})
+      install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/vectorclass)
       install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
   install (TARGETS ${PROJECT_NAME} #${compatlibname} 
       ARCHIVE DESTINATION ${UTIL_LIB_DIR}
