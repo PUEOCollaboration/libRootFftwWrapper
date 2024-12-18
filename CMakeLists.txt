@@ -58,10 +58,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   SOVERSION ${PROJECT_VERSION_MAJOR})
 
 target_include_directories(${PROJECT_NAME}
-  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
-          $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-          $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
+          $<INSTALL_INTERFACE:include>
+          $<INSTALL_INTERFACE:vectorclass>
   PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
           $<BUILD_INTERFACE:${FFTW_INCLUDES}>
 )
@@ -80,44 +80,78 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #================================================================================================
 #                                       INSTALLING
 #================================================================================================
-macro (do_install)
-      message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
-      message("DICTNAME is set to ${DICTNAME}" )
-      message("PROJECT_BINARY_DIR is set to ${PROJECT_BINARY_DIR}")
 
-      file (GLOB CMAKE_FILES "cmake/modules/*.cmake")
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-      file (GLOB VCL_FILES "vectorclass/*.h") 
+configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+)
 
-      install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
-      install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/vectorclass)
-      install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
-  install (TARGETS ${PROJECT_NAME} #${compatlibname} 
-      ARCHIVE DESTINATION ${UTIL_LIB_DIR}
-      LIBRARY DESTINATION ${UTIL_LIB_DIR}
-      RUNTIME DESTINATION ${UTIL_BIN_DIR})
-      #Only needed for ROOT6
-      if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
-      	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
-      endif() 
-endmacro()
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
 
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+)
 
-# Install in any and all available locations.
-# This might lead to some unnecessary re-installation (if you're running both ANITA and PUEO software, e.g.
-# To avoid this, disable the irrelevant environmental variable when building either
-if(DEFINED ENV{PUEO_UTIL_INSTALL_DIR})
-    message("PUEO_UTIL_INSTALL_DIR is set to $ENV{PUEO_UTIL_INSTALL_DIR}")
-    set(UTIL_LIB_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
-    set(UTIL_INC_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/include)
-    set(UTIL_BIN_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/bin)
-    set(UTIL_SHARE_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/share)
-    set(LD_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
-    set(INC_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/include)
-    do_install()
-endif()
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
 
+install(EXPORT ${PROJECT_NAME}Targets
+    NAMESPACE RootFftwWrapper::
+    FILE ${PROJECT_NAME}.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
+                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
+# TODO: not sure if pcm files should be installed, or how
+# (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
+
+# macro (do_install)
+#       message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
+#       message("DICTNAME is set to ${DICTNAME}" )
+#       message("PROJECT_BINARY_DIR is set to ${PROJECT_BINARY_DIR}")
+#
+#       file (GLOB CMAKE_FILES "cmake/modules/*.cmake")
+#
+#       file (GLOB VCL_FILES "vectorclass/*.h") 
+#
+#       install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
+#       install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/vectorclass)
+#       install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
+#   install (TARGETS ${PROJECT_NAME} #${compatlibname} 
+#       ARCHIVE DESTINATION ${UTIL_LIB_DIR}
+#       LIBRARY DESTINATION ${UTIL_LIB_DIR}
+#       RUNTIME DESTINATION ${UTIL_BIN_DIR})
+#       #Only needed for ROOT6
+#       if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
+#       	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
+#       endif() 
+# endmacro()
+#
+#
+# # Install in any and all available locations.
+# # This might lead to some unnecessary re-installation (if you're running both ANITA and PUEO software, e.g.
+# # To avoid this, disable the irrelevant environmental variable when building either
+# if(DEFINED ENV{PUEO_UTIL_INSTALL_DIR})
+#     message("PUEO_UTIL_INSTALL_DIR is set to $ENV{PUEO_UTIL_INSTALL_DIR}")
+#     set(UTIL_LIB_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
+#     set(UTIL_INC_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/include)
+#     set(UTIL_BIN_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/bin)
+#     set(UTIL_SHARE_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/share)
+#     set(LD_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
+#     set(INC_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/include)
+#     do_install()
+# endif()
+#
+#
 ###############################################################################################
 ### Binaries
 ### I'm a CMAKE n00b so ther's probably a much better way to do this? 
