@@ -123,6 +123,7 @@ endif()
 set (BINSRCDIR test) 
 macro( do_binary binary_name ) 
   add_executable(${binary_name} ${BINSRCDIR}/${binary_name}.cxx) 
+  target_include_directories(${binary_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
   target_link_libraries(${binary_name}  ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${PROJECT_NAME})
 endmacro() 
 
