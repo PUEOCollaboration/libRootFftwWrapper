@@ -14,15 +14,6 @@ if( ${ROOT_VERSION} VERSION_LESS "6.16")
   message(FATAL_ERROR "Please update ROOT to at least 6.16")
 endif()
 
-set (DICTIONARY_OPTIONS )
-if(ROOT_Minuit2_LIBRARY)
-  message("Found Minuit2!")  
-else()
-  message("Could not find Minuit2. Disabling anything that requires it...") 
-  add_definitions(-DDONT_HAVE_MINUIT2)
-  set (DICTIONARY_OPTIONS ${DICTIONARY_OPTIONS} -DDONT_HAVE_MINUIT2)
-endif()
-
 # TODO: FFTW didn't ship with a finder?
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
