@@ -52,11 +52,11 @@ file(GLOB HEADER_FILES
 file(GLOB_RECURSE SOURCE_FILES src/*.cxx)
 #file(GLOB_RECURSE THIS_LD LinkDef.h)
 
-set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx
-  src/RFFilter.cxx ) 
-
-set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h
-  include/RFSignal.h include/RFFilter.h ) 
+# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx
+#   src/RFFilter.cxx ) 
+#
+# set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h
+#   include/RFSignal.h include/RFFilter.h ) 
 
 
 
@@ -66,8 +66,8 @@ set(DICTNAME G__${PROJECT_NAME})
 
 ROOT_GENERATE_DICTIONARY(${DICTNAME} ${HEADER_FILES} LINKDEF LinkDef.h OPTIONS
   ${DICTIONARY_OPTIONS})
-ROOT_GENERATE_DICTIONARY(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} LINKDEF
-  LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
+# ROOT_GENERATE_DICTIONARY(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} LINKDEF
+#   LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
 
 #---Create a shared library with geneated dictionary
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${DICTNAME}.cxx)
@@ -113,7 +113,6 @@ macro (do_install)
       #Only needed for ROOT6
       if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
       	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
-    #install (FILES ${PROJECT_BINARY_DIR}/lib${PROJECT_NAME}.rootmap DESTINATION ${UTIL_LIB_DIR})
       endif() 
 endmacro()
 
@@ -132,49 +131,6 @@ if(DEFINED ENV{PUEO_UTIL_INSTALL_DIR})
     do_install()
 endif()
 
-if(DEFINED ENV{ANITA_UTIL_INSTALL_DIR})
-    message("ANITA_UTIL_INSTALL_DIR is set to $ENV{ANITA_UTIL_INSTALL_DIR}")
-    set(UTIL_LIB_DIR $ENV{ANITA_UTIL_INSTALL_DIR}/lib)
-    set(UTIL_INC_DIR $ENV{ANITA_UTIL_INSTALL_DIR}/include)
-    set(UTIL_BIN_DIR $ENV{ANITA_UTIL_INSTALL_DIR}/bin)
-    set(UTIL_SHARE_DIR $ENV{ANITA_UTIL_INSTALL_DIR}/share)
-    set(LD_UTIL $ENV{ANITA_UTIL_INSTALL_DIR}/lib)
-    set(INC_UTIL $ENV{ANITA_UTIL_INSTALL_DIR}/include)
-    do_install()
-endif()
-
-if(DEFINED ENV{ARA_UTIL_INSTALL_DIR})
-    message("ARA_UTIL_INSTALL_DIR is set to $ENV{ARA_UTIL_INSTALL_DIR}")
-    set(UTIL_LIB_DIR $ENV{ARA_UTIL_INSTALL_DIR}/lib)
-    set(UTIL_INC_DIR $ENV{ARA_UTIL_INSTALL_DIR}/include)
-    set(UTIL_BIN_DIR $ENV{ARA_UTIL_INSTALL_DIR}/bin)
-    set(UTIL_SHARE_DIR $ENV{ARA_UTIL_INSTALL_DIR}/share)
-    set(LD_UTIL $ENV{ARA_UTIL_INSTALL_DIR}/lib)
-    set(INC_UTIL $ENV{ARA_UTIL_INSTALL_DIR}/include)
-    do_install()
-endif()
-
-if(DEFINED ENV{RNO_G_INSTALL_DIR})
-  message("RNO_G_INSTALL_DIR is set to $ENV{RNO_G_INSTALL_DIR}")
-  set(UTIL_LIB_DIR $ENV{RNO_G_INSTALL_DIR}/lib)
-    set(UTIL_INC_DIR $ENV{RNO_G_INSTALL_DIR}/include)
-    set(UTIL_BIN_DIR $ENV{RNO_G_INSTALL_DIR}/bin)
-    set(UTIL_SHARE_DIR $ENV{RNO_G_INSTALL_DIR}/share)
-    set(LD_UTIL $ENV{RNO_G_INSTALL_DIR}/lib)
-    set(INC_UTIL $ENV{RNO_G_INSTALL_DIR}/include)
-    do_install()
-endif()
-
-if(NOT DEFINED UTIL_LIB_DIR)
-    message("No environmental installation directory exists, will install to /usr/local")
-    set(UTIL_LIB_DIR /usr/local/lib)
-    set(UTIL_INC_DIR /usr/local/include)
-    set(UTIL_BIN_DIR /usr/local/bin)
-    set(UTIL_SHARE_DIR /usr/local/share)
-    set(LD_UTIL /usr/local/lib)
-    set(INC_UTIL /usr/local/include)
-    do_install()
-endif()
 
 ###############################################################################################
 ### Binaries
