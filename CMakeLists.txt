@@ -106,10 +106,10 @@ macro (do_install)
       install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
       install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/${VECTORDIR})
       install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
-  # install (TARGETS ${PROJECT_NAME} ${compatlibname} 
-      # ARCHIVE DESTINATION ${UTIL_LIB_DIR}
-      # LIBRARY DESTINATION ${UTIL_LIB_DIR}
-      # RUNTIME DESTINATION ${UTIL_BIN_DIR})
+  install (TARGETS ${PROJECT_NAME} #${compatlibname} 
+      ARCHIVE DESTINATION ${UTIL_LIB_DIR}
+      LIBRARY DESTINATION ${UTIL_LIB_DIR}
+      RUNTIME DESTINATION ${UTIL_BIN_DIR})
       #Only needed for ROOT6
       if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
       	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
@@ -266,7 +266,7 @@ endif (VECTORIZE)
 ##################################################################
 
 option(USE_EIGEN "Use Eigen3 for certain linear algebra options" OFF) 
-set (EIGEN3_INCLUDE_DIR "/usr/include/eigen3" CACHE String "Eigen3 include path") 
+set (EIGEN3_INCLUDE_DIR "/usr/include/eigen3" CACHE STRING "Eigen3 include path") 
 option(USE_ARMADILLO "Use Armadillo for certain linear algebra options" OFF) 
 
 if (USE_EIGEN AND USE_ARMADILLO) 
