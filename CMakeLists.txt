@@ -8,21 +8,9 @@ project(RootFftwWrapper VERSION 3.0.1)
 if(NOT WIN32)
   string(ASCII 27 Esc)
   set(ColourReset "${Esc}[m")
-  set(ColourBold  "${Esc}[1m")
-  set(Red         "${Esc}[31m")
-  set(Green       "${Esc}[32m")
-  set(Yellow      "${Esc}[33m")
-  set(Blue        "${Esc}[34m")
-  set(Magenta     "${Esc}[35m")
-  set(Cyan        "${Esc}[36m")
-  set(White       "${Esc}[37m")
-  set(BoldRed     "${Esc}[1;31m")
   set(BoldGreen   "${Esc}[1;32m")
   set(BoldYellow  "${Esc}[1;33m")
   set(BoldBlue    "${Esc}[1;34m")
-  set(BoldMagenta "${Esc}[1;35m")
-  set(BoldCyan    "${Esc}[1;36m")
-  set(BoldWhite   "${Esc}[1;37m")
 endif()
 
 # set(compatlibname "RootFftwWrapperCompat")
@@ -81,38 +69,40 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #                                       INSTALLING
 #================================================================================================
 
+# installing headers
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
+# Config files and such
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+# Generating RootFftwWrapperConfig.cmake
 configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
   INSTALL_DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
-
+# Generating RootFftwWrapperConfigVersion.cmake
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
-
+# Installing these two config files
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
-
+# installing the libraries
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATION lib)
+# TODO: not sure if pcm files should be installed, or how (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
+# installing the target file
 install(EXPORT ${PROJECT_NAME}Targets
     NAMESPACE RootFftwWrapper::
     FILE ${PROJECT_NAME}Targets.cmake
     DESTINATION lib/cmake/${PROJECT_NAME})
-
-                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
-# TODO: not sure if pcm files should be installed, or how
-# (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
 
 #================================================================================================
 #                                       BINARIES
