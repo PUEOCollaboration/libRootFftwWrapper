@@ -84,33 +84,28 @@ elseif(USE_ARMADILLO) # TODO this only works if armadillo is in standard path
 endif() 
 
 
-###############################################################################
-#### Multithread options 
-################################################################################
-option(FFTTOOLS_ENABLE_OPENMP "Enable OpenMP support (experimenta, mutually exclusive with FFTTOOLS_ENABLE_THREAD_SAFE) for doFft and doInvFft" OFF) 
-option(FFTTOOLS_ENABLE_THREAD_SAFE "Make fft methods threadsafe (mutually exclusive with FFTTOOLS_ENABLE_OPEMP)" OFF) 
+## Multithread options 
+option(
+  FFTTOOLS_ENABLE_OPENMP 
+  "Enable OpenMP support (experimental, mutually exclusive with FFTTOOLS_ENABLE_THREAD_SAFE) for doFft and doInvFft" 
+  OFF
+) 
+option(
+  FFTTOOLS_ENABLE_THREAD_SAFE 
+  "Make fft methods threadsafe (mutually exclusive with FFTTOOLS_ENABLE_OPEMP)" 
+  OFF
+)
 
 if (FFTTOOLS_ENABLE_OPENMP AND FFTTOOLS_ENABLE_THREAD_SAFE)
+  message(FATAL_ERROR "FFTTOOLS_ENABLE_THREAD_SAFE and FFTTOOLS_ENABLE_OPENMP are mutually exclusive")
 
-  message(FATAL_ERROR "FFTTOOLS_ENABLE_THREAD_SAFE and FFTTOOLS_ENABLE_OPENMP are mutually exclusive") 
+elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
+  target_compile_options(${PROJECT_NAME} PRIVATE -DFFTTOOLS_THREAD_SAFE)
 
-elseif(FFTTOOLS_ENABLE_THREAD_SAFE) 
-  add_definitions( -DFFTTOOLS_THREAD_SAFE )
-elseif(FFTTOOLS_ENABLE_OPENMP) 
-
-  FIND_PACKAGE( OpenMP REQUIRED)
-  if(OPENMP_FOUND)
-    message("OPENMP FOUND")
-    add_definitions (-DFFTTOOLS_USE_OMP) 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-
-    do_binary(testOpenMP) 
-  else() 
-    message(FATAL_ERROR "you tried to use openmp but Cmake couldn't find compiler support") 
-  endif() 
-endif() 
+elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux at least)
+  find_package(OpenMP REQUIRED)
+  target_compile_options(${PROJECT_NAME} PRIVATE -DFFTTOOLS_USE_OMP ${OpenMP_CXX_FLAGS})
+endif()
 
 
 #### api compatibility 
@@ -279,8 +274,17 @@ install(EXPORT ${PROJECT_NAME}Targets
 #                                       BINARIES
 #================================================================================================
 
-set(BINLIST testFFTtools testSubtract)
+if(FFTTOOLS_ENABLE_OPENMP) 
+  add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
+  target_include_directories(testOpenMP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_link_libraries(testOpenMP 
+    PRIVATE ${ROOT_LIBRARIES} 
+            ${FFTW_LIBRARIES} 
+            ${PROJECT_NAME}
+  )
+endif() 
 
+set(BINLIST testFFTtools testSubtract)
 foreach(b IN LISTS BINLIST) 
   add_executable(${b}
     "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx"
@@ -294,4 +298,3 @@ foreach(b IN LISTS BINLIST)
             ${PROJECT_NAME}
   )
 endforeach()
-
