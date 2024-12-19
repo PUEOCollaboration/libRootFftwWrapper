@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.19)
 project(RootFftwWrapper VERSION 3.0.1)
-
 # set(compatlibname "RootFftwWrapperCompat")
+
+file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
+# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
-# add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
-# target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
+# add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES}) 
 
 #================================================================================================
 #                                       HOUSEKEEPING
@@ -43,13 +44,14 @@ message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourRese
 
 ## Manual vectorization option; maybe in the future this can be made a CMake module or something 
 option(VECTORIZE "Enable Manual SIMD Vectorization" ON) 
-if (VECTORIZE) #defined in anitaBuildTool, default on
+# This option is defined in pueoBuilder, default on here but off there
+if(VECTORIZE)
   target_compile_definitions(${PROJECT_NAME} PRIVATE -DENABLE_VECTORIZE ) 
 
   # TODO someone should do this for clang if they want it to be as fast as possible 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1)
-      if(NATIVE_ARCH) #defined in pueoBuilder, default on
+      if(NATIVE_ARCH) # defined in pueoBuilder, default on
         target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
       endif()
     endif()
@@ -61,31 +63,24 @@ if (VECTORIZE) #defined in anitaBuildTool, default on
       target_compile_options(${PROJECT_NAME} PRIVATE -fabi-version=0)
     endif()
   endif() 
-
-endif (VECTORIZE) 
-
+endif() 
 
 
-##################################################################
-###  Linear algebra options 
-##################################################################
-
+##  Linear algebra options 
 option(USE_EIGEN "Use Eigen3 for certain linear algebra options" OFF) 
-set (EIGEN3_INCLUDE_DIR "/usr/include/eigen3" CACHE STRING "Eigen3 include path") 
 option(USE_ARMADILLO "Use Armadillo for certain linear algebra options" OFF) 
 
 if (USE_EIGEN AND USE_ARMADILLO) 
-
   message(FATAL_ERROR "USE_EIGEN and USE_ARMADILLO are mutually exclusive") 
 
 elseif(USE_EIGEN) 
-  add_definitions ( -DUSE_EIGEN) 
-  include_directories (  ${EIGEN3_INCLUDE_DIR} ) 
-elseif(USE_ARMADILLO) 
+  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3") # TODO maybe don't hardcode this
+  target_compile_options(${PROJECT_NAME} PRIVATE -DUSE_EIGEN) 
+  target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR}) 
 
-  add_definitions( -DUSE_ARMADILLO) 
-  target_link_libraries(${PROJECT_NAME} armadillo) 
-
+elseif(USE_ARMADILLO) # TODO this only works if armadillo is in standard path
+  target_compile_options(${PROJECT_NAME} PRIVATE -DUSE_ARMADILLO) 
+  target_link_libraries(${PROJECT_NAME} PRIVATE armadillo) 
 endif() 
 
 
@@ -207,8 +202,6 @@ mark_as_advanced(FFTW_USE_PATIENT)
 #================================================================================================
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
-file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
-# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
 # set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
@@ -226,6 +219,7 @@ target_include_directories(${PROJECT_NAME}
 
 # Propagating these C/C++ compiler flags to downstream projects when they link against this library
 target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
+# target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
 # Propagating this linker option to downstream projects when they link against this library
 # TODO: Not sure if this is really needed, since "-g" is already set during compilation
