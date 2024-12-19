@@ -38,123 +38,19 @@ message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourRese
 
 
 #================================================================================================
-#                                       BUILDING
-#================================================================================================
-
-file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
-file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
-# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
-# set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
-
-set_target_properties(${PROJECT_NAME} PROPERTIES 
-  VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION_MAJOR})
-
-target_include_directories(${PROJECT_NAME}
-  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
-          $<INSTALL_INTERFACE:include>
-          $<INSTALL_INTERFACE:vectorclass>
-  PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
-          $<BUILD_INTERFACE:${FFTW_INCLUDES}>
-)
-
-# Propagating these C/C++ compiler flags to downstream projects when they link against this library
-target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
-
-# Propagating this linker option to downstream projects when they link against this library
-# TODO: Not sure if this is really needed, since "-g" is already set during compilation
-target_link_options(${PROJECT_NAME} PUBLIC "-g")
-                                                      
-# TODO: do we really need to link all of the ROOT libraries?
-target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
-# target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
-
-set(DICTNAME G__${PROJECT_NAME})
-# set(DICTNAMECOMPAT G__${compatlibname})
-
-root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF LinkDef.h OPTIONS ${DICTIONARY_OPTIONS})
-# root_generate_dictionary(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} MODULE ${compatlibname} LINKDEF LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
-
-
-#================================================================================================
-#                                       INSTALLING
-#================================================================================================
-
-# installing headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
-# Config files and such
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
-# Generating RootFftwWrapperConfig.cmake
-configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION "lib/cmake/${PROJECT_NAME}"
-)
-# Generating RootFftwWrapperConfigVersion.cmake
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion
-)
-# Installing these two config files
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  DESTINATION "lib/cmake/${PROJECT_NAME}"
-)
-
-# installing the libraries
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATION lib)
-# TODO: not sure if pcm files should be installed, or how (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
-# installing the target file
-install(EXPORT ${PROJECT_NAME}Targets
-    NAMESPACE RootFftwWrapper::
-    FILE ${PROJECT_NAME}Targets.cmake
-    DESTINATION lib/cmake/${PROJECT_NAME})
-
-#================================================================================================
-#                                       BINARIES
-#================================================================================================
-
-set(BINLIST testFFTtools testSubtract)
-
-foreach(b IN LISTS BINLIST) 
-  add_executable(${b}
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx"
-  ) 
-  target_include_directories(${b} 
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(${b} 
-    PRIVATE ${ROOT_LIBRARIES} 
-            ${FFTW_LIBRARIES} 
-            ${PROJECT_NAME}
-  )
-endforeach()
-
-#================================================================================================
 #                                       OPTIONS
 #================================================================================================
 
-#################################################################################
-###  Manual vectorization option 
-###  Maybe in the future this can be made a CMake module or something 
-################################################################################# 
-
+## Manual vectorization option; maybe in the future this can be made a CMake module or something 
 option(VECTORIZE "Enable Manual SIMD Vectorization" ON) 
 if (VECTORIZE) #defined in anitaBuildTool, default on
-  add_definitions( -DENABLE_VECTORIZE ) 
+  target_compile_definitions(${PROJECT_NAME} PRIVATE -DENABLE_VECTORIZE ) 
 
-  if(CMAKE_COMPILER_IS_GNUCXX) 
-
-    ### someone should do this for clang if they want it to be as fast as possible 
+  # TODO someone should do this for clang if they want it to be as fast as possible 
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1)
-      if(NATIVE_ARCH) #define in anitaBuildTool, default on
-        add_definitions(-march=native)
+      if(NATIVE_ARCH) #defined in pueoBuilder, default on
+        target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
       endif()
     endif()
 
@@ -162,7 +58,7 @@ if (VECTORIZE) #defined in anitaBuildTool, default on
       # Vectorize docs...
       # If you are using the Gnu compiler version 3.x or 4.x then you must
       # set the ABI version to 4 or more, or 0 for a reasonable default
-      add_definitions(-fabi-version=0)
+      target_compile_options(${PROJECT_NAME} PRIVATE -fabi-version=0)
     endif()
   endif() 
 
@@ -277,4 +173,131 @@ mark_as_advanced(FFTW_USE_PATIENT)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#================================================================================================
+#                                       BUILDING
+#================================================================================================
+
+file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
+file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
+# set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
+# set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR})
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
+          $<INSTALL_INTERFACE:include>
+          $<INSTALL_INTERFACE:vectorclass>
+  PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
+          $<BUILD_INTERFACE:${FFTW_INCLUDES}>
+)
+
+# Propagating these C/C++ compiler flags to downstream projects when they link against this library
+target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
+
+# Propagating this linker option to downstream projects when they link against this library
+# TODO: Not sure if this is really needed, since "-g" is already set during compilation
+target_link_options(${PROJECT_NAME} PUBLIC "-g")
+
+# TODO: do we really need to link all of the ROOT libraries?
+target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+# target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+
+set(DICTNAME G__${PROJECT_NAME})
+# set(DICTNAMECOMPAT G__${compatlibname})
+
+root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF LinkDef.h OPTIONS ${DICTIONARY_OPTIONS})
+# root_generate_dictionary(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} MODULE ${compatlibname} LINKDEF LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
+
+
+#================================================================================================
+#                                       INSTALLING
+#================================================================================================
+
+# installing headers
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
+                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
+# Config files and such
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+# Generating RootFftwWrapperConfig.cmake
+configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION "lib/cmake/${PROJECT_NAME}"
+)
+# Generating RootFftwWrapperConfigVersion.cmake
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+# Installing these two config files
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  DESTINATION "lib/cmake/${PROJECT_NAME}"
+)
+
+# installing the libraries
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATION lib)
+# TODO: not sure if pcm files should be installed, or how (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
+# installing the target file
+install(EXPORT ${PROJECT_NAME}Targets
+    NAMESPACE RootFftwWrapper::
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION lib/cmake/${PROJECT_NAME})
+
+#================================================================================================
+#                                       BINARIES
+#================================================================================================
+
+set(BINLIST testFFTtools testSubtract)
+
+foreach(b IN LISTS BINLIST) 
+  add_executable(${b}
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx"
+  ) 
+  target_include_directories(${b} 
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+  target_link_libraries(${b} 
+    PRIVATE ${ROOT_LIBRARIES} 
+            ${FFTW_LIBRARIES} 
+            ${PROJECT_NAME}
+  )
+endforeach()
 
