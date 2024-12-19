@@ -120,80 +120,23 @@ if(FORCE_OLD_GPP_ABI)
 endif() 
 
 
-
-### Let's see if this works 
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
   if (${option_name}) 
-    add_definitions ( -D${option_name} )
+    target_compile_options(${PROJECT_NAME} PRIVATE -D${option_name} )
   endif()
 endmacro() 
 
-
-
-#### Random Sine Subtraction options #### 
+## Random Sine Subtraction options
 stupid_option(SINE_SUBTRACT_USE_FLOATS  "Use floats for vectorized sine subtraction") 
 mark_as_advanced(SINE_SUBTRACT_USE_FLOATS)
+
 stupid_option(SINE_SUBTRACT_PROFILE  "Enable Sine Subtraction profiling (you probably don't want to do this)") 
 mark_as_advanced(SINE_SUBTRACT_PROFILE)
 
-#option ( SINE_SUBTRACT_USE_FLOATS "Use floats for vectorized Sine Subtraction" OFF)
-#mark_as_advanced( SINE_SUBTRACT_USE_FLOATS) 
-#if ( SINE_SUBTRACT_USE_FLOATS) 
-#  add_definitions ( -DSINE_SUBTRACT_USE_FLOATS)
-#endif()
-#
-#option ( SINE_SUBTRACT_PROFILE "Enable Sine Subtraction profiling (you probably don't want to do this) " OFF)
-#mark_as_advanced( SINE_SUBTRACT_PROFILE) 
-#if ( SINE_SUBTRACT_PROFILE) 
-#  add_definitions ( -DSINE_SUBTRACT_PROFILE)
-#endif()
-#
-#
-
-#### Misc options  #### 
-
+## Miscellaneous options
 stupid_option(FFTW_USE_PATIENT  "Use FFTW Patient plans... not recommended unless you are good about saving wisdom")
 mark_as_advanced(FFTW_USE_PATIENT) 
-
-#option(USE_PATIENT_PLANS "Use FFTW_PATIENT" OFF) 
-#mark_as_advanced( USE_PATIENT_PLANS) 
-#
-#if (USE_PATIENT_PLANS) 
-#  add_definitions ( -DFFTW_USE_PATIENT ) 
-#endif() 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #================================================================================================
