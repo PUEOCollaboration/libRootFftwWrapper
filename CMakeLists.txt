@@ -86,7 +86,7 @@ include(CMakePackageConfigHelpers)
 
 configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+  INSTALL_DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
 write_basic_package_version_file(
@@ -98,15 +98,15 @@ write_basic_package_version_file(
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+  DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets)
 
 install(EXPORT ${PROJECT_NAME}Targets
     NAMESPACE RootFftwWrapper::
-    FILE ${PROJECT_NAME}.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+    FILE ${PROJECT_NAME}Targets.cmake
+    DESTINATION lib/cmake/${PROJECT_NAME})
 
                               # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
