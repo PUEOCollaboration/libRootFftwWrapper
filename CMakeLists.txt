@@ -1,9 +1,19 @@
 cmake_minimum_required(VERSION 3.19)
 project(RootFftwWrapper VERSION 3.0.1)
 
+# set(compatlibname "RootFftwWrapperCompat")
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+# add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
+# target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
+
 #================================================================================================
 #                                       HOUSEKEEPING
 #================================================================================================
+if(NOT CMAKE_BUILD_TYPE) 
+  set(CMAKE_BUILD_TYPE Default
+    CACHE STRING "Choose tye type of build: None Debug Release RelWithDebInfo MinSizeRel Default"
+    FORCE) 
+endif()
 
 if(NOT WIN32)
   string(ASCII 27 Esc)
@@ -13,7 +23,6 @@ if(NOT WIN32)
   set(BoldBlue    "${Esc}[1;34m")
 endif()
 
-# set(compatlibname "RootFftwWrapperCompat")
 
 find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net Minuit Spectrum Minuit2)
 message(STATUS "${BoldGreen}Found ROOT ${ROOT_VERSION}${ColourReset}")
@@ -37,10 +46,6 @@ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
 # set (COMPAT_SOURCE_FILES src/FFTtools.cxx src/FFTWComplex.cxx src/RFSignal.cxx src/RFFilter.cxx ) 
 # set (COMPAT_HEADER_FILES include/FFTtools.h include/FFTWComplex.h include/RFSignal.h include/RFFilter.h ) 
 
-add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
-# add_library(${compatlibname} SHARED ${COMPAT_SOURCE_FILES} ${DICTNAMECOMPAT}.cxx) 
-# target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
-
 set_target_properties(${PROJECT_NAME} PROPERTIES 
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR})
@@ -54,6 +59,13 @@ target_include_directories(${PROJECT_NAME}
           $<BUILD_INTERFACE:${FFTW_INCLUDES}>
 )
 
+# Propagating these C/C++ compiler flags to downstream projects when they link against this library
+target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
+
+# Propagating this linker option to downstream projects when they link against this library
+# TODO: Not sure if this is really needed, since "-g" is already set during compilation
+target_link_options(${PROJECT_NAME} PUBLIC "-g")
+                                                      
 # TODO: do we really need to link all of the ROOT libraries?
 target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 # target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
@@ -128,44 +140,6 @@ endforeach()
 #                                       OPTIONS
 #================================================================================================
 
-#------------------------ END OF DECEMBER 2024 CMAKELIST UPDATES   ------------------------
-
-
-### The default build configuration is INSANE. No optimization? What is this 1971? 
-
-message (" Adding new build type") 
-
-set(CMAKE_CXX_FLAGS_DEFAULT 
-  "-Os -g -Wall" 
-  CACHE STRING "c++ Flags used during default libRootFftwWrapper builds" 
-  FORCE ) 
-
-set(CMAKE_C_FLAGS_DEFAULT 
-  "-Os -g -Wall"
-  CACHE STRING "c Flags used during default libRootFftwWrapper builds" 
-  FORCE ) 
-
-set(CMAKE_EXE_LINKER_FLAGS_DEFAULT 
-  "-g"
-  CACHE STRING "ld Flags used during default libRootFftwWrapper builds" 
-  FORCE ) 
-
-set(CMAKE_SHARED_LINKER_FLAGS_DEFAULT 
-  "-g"
-  CACHE STRING "ld Flags used during default libRootFftwWrapper builds" 
-  FORCE ) 
-
-
-mark_as_advanced ( CMAKE_CXX_FLAGS_DEFAULT  CMAKE_C_FLAGS_DEFAULT CMAKE_EXE_LINKER_FLAGS_DEFAULT CMAKE_SHARED_LINKER_FLAGS_DEFAULT) 
-
-if (NOT CMAKE_BUILD_TYPE) 
-  set (CMAKE_BUILD_TYPE Default
-    CACHE STRING "Choose tye type of build: None Debug Release RelWithDebInfo MinSizeRel Default"
-    FORCE ) 
-endif()
-
-
-
 #################################################################################
 ###  Manual vectorization option 
 ###  Maybe in the future this can be made a CMake module or something 
@@ -180,7 +154,7 @@ if (VECTORIZE) #defined in anitaBuildTool, default on
     ### someone should do this for clang if they want it to be as fast as possible 
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1)
       if(NATIVE_ARCH) #define in anitaBuildTool, default on
-	add_definitions(-march=native)
+        add_definitions(-march=native)
       endif()
     endif()
 
