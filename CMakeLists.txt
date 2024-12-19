@@ -114,65 +114,33 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
 # TODO: not sure if pcm files should be installed, or how
 # (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
 
-# macro (do_install)
-#       message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
-#       message("DICTNAME is set to ${DICTNAME}" )
-#       message("PROJECT_BINARY_DIR is set to ${PROJECT_BINARY_DIR}")
-#
-#       file (GLOB CMAKE_FILES "cmake/modules/*.cmake")
-#
-#       file (GLOB VCL_FILES "vectorclass/*.h") 
-#
-#       install (FILES ${HEADER_FILES} DESTINATION ${UTIL_INC_DIR})
-#       install (FILES ${VCL_FILES} DESTINATION ${UTIL_INC_DIR}/vectorclass)
-#       install (FILES ${CMAKE_FILES} DESTINATION ${UTIL_SHARE_DIR}/cmake/modules)
-#   install (TARGETS ${PROJECT_NAME} #${compatlibname} 
-#       ARCHIVE DESTINATION ${UTIL_LIB_DIR}
-#       LIBRARY DESTINATION ${UTIL_LIB_DIR}
-#       RUNTIME DESTINATION ${UTIL_BIN_DIR})
-#       #Only needed for ROOT6
-#       if( ${ROOT_VERSION} VERSION_GREATER "5.99.99")
-#       	  install (FILES ${PROJECT_BINARY_DIR}/${DICTNAME}_rdict.pcm DESTINATION ${UTIL_LIB_DIR})
-#       endif() 
-# endmacro()
-#
-#
-# # Install in any and all available locations.
-# # This might lead to some unnecessary re-installation (if you're running both ANITA and PUEO software, e.g.
-# # To avoid this, disable the irrelevant environmental variable when building either
-# if(DEFINED ENV{PUEO_UTIL_INSTALL_DIR})
-#     message("PUEO_UTIL_INSTALL_DIR is set to $ENV{PUEO_UTIL_INSTALL_DIR}")
-#     set(UTIL_LIB_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
-#     set(UTIL_INC_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/include)
-#     set(UTIL_BIN_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/bin)
-#     set(UTIL_SHARE_DIR $ENV{PUEO_UTIL_INSTALL_DIR}/share)
-#     set(LD_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/lib)
-#     set(INC_UTIL $ENV{PUEO_UTIL_INSTALL_DIR}/include)
-#     do_install()
-# endif()
-#
-#
-###############################################################################################
-### Binaries
-### I'm a CMAKE n00b so ther's probably a much better way to do this? 
-###############################################################################################
+#================================================================================================
+#                                       BINARIES
+#================================================================================================
 
-set (BINSRCDIR test) 
-macro( do_binary binary_name ) 
-  add_executable(${binary_name} ${BINSRCDIR}/${binary_name}.cxx) 
-  target_include_directories(${binary_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(${binary_name}  ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} ${PROJECT_NAME})
-endmacro() 
+set(BINLIST testFFTtools testSubtract)
 
-do_binary(testFFTtools) 
+foreach(b IN LISTS BINLIST) 
+  add_executable(${b}
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx"
+  ) 
+  target_include_directories(${b} 
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+  target_link_libraries(${b} 
+    PRIVATE ${ROOT_LIBRARIES} 
+            ${FFTW_LIBRARIES} 
+            ${PROJECT_NAME}
+  )
+endforeach()
 
-if(ROOT_Minuit2_LIBRARY)
-do_binary(testSubtract) 
-endif() 
+#================================================================================================
+#                                       OPTIONS
+#================================================================================================
+
+#------------------------ END OF DECEMBER 2024 CMAKELIST UPDATES   ------------------------
 
 
-
-#################################################################################3
 ### The default build configuration is INSANE. No optimization? What is this 1971? 
 
 message (" Adding new build type") 
