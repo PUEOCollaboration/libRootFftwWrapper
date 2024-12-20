@@ -154,7 +154,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
           $<INSTALL_INTERFACE:include>
-          $<INSTALL_INTERFACE:vectorclass>
+          $<INSTALL_INTERFACE:include/vectorclass>
   PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
           $<BUILD_INTERFACE:${FFTW_INCLUDES}>
 )
@@ -213,7 +213,6 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATIO
 # TODO: not sure if pcm files should be installed, or how (https://root-forum.cern.ch/t/cmake-not-installing-pcm-and-rootmap/50997)
 # installing the target file
 install(EXPORT ${PROJECT_NAME}Targets
-    NAMESPACE RootFftwWrapper::
     FILE ${PROJECT_NAME}Targets.cmake
     DESTINATION lib/cmake/${PROJECT_NAME})
 
