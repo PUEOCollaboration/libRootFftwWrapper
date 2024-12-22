@@ -106,7 +106,8 @@ elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux at least)
   find_package(OpenMP REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_USE_OMP ${OpenMP_CXX_FLAGS})
+  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
+  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
 
