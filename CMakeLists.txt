@@ -101,7 +101,7 @@ if (FFTTOOLS_ENABLE_OPENMP AND FFTTOOLS_ENABLE_THREAD_SAFE)
 elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
   target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_THREAD_SAFE)
 
-elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux at least)
+elseif(FFTTOOLS_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
   target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
@@ -162,11 +162,22 @@ target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
 # Propagating this linker option to downstream projects when they link against this library
-# TODO: Not sure if this is really needed, since "-g" is already set during compilation
 target_link_options(${PROJECT_NAME} PUBLIC "-g")
 
-# TODO: do we really need to link all of the ROOT libraries?
-target_link_libraries(${PROJECT_NAME} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+# TODO: figure out which ROOT libraries we actually use
+target_link_libraries(${PROJECT_NAME} PUBLIC ${FFTW_LIBRARIES}
+                                             ROOT::Core
+                                             ROOT::Gpad
+                                             ROOT::MathMore 
+                                             ROOT::MathCore
+                                             ROOT::RIO
+                                             ROOT::Hist
+                                             ROOT::Tree
+                                             ROOT::Net
+                                             ROOT::Minuit
+                                             ROOT::Spectrum
+                                             ROOT::Minuit2
+)
 # target_link_libraries(${compatlibname} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 set(DICTNAME G__${PROJECT_NAME})
