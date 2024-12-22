@@ -46,13 +46,13 @@ message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourRese
 option(VECTORIZE "Enable Manual SIMD Vectorization" ON) 
 # This option is defined in pueoBuilder, default on here but off there
 if(VECTORIZE)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_VECTORIZE ) 
+  target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_VECTORIZE ) 
 
   # TODO someone should do this for clang if they want it to be as fast as possible 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1)
       if(NATIVE_ARCH) # defined in pueoBuilder, default on
-        target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
+        target_compile_options(${PROJECT_NAME} PUBLIC -march=native)
       endif()
     endif()
 
@@ -60,7 +60,7 @@ if(VECTORIZE)
       # Vectorize docs...
       # If you are using the Gnu compiler version 3.x or 4.x then you must
       # set the ABI version to 4 or more, or 0 for a reasonable default
-      target_compile_options(${PROJECT_NAME} PRIVATE -fabi-version=0)
+      target_compile_options(${PROJECT_NAME} PUBLIC -fabi-version=0)
     endif()
   endif() 
 endif() 
@@ -75,14 +75,14 @@ if (USE_EIGEN AND USE_ARMADILLO)
 
 elseif(USE_EIGEN) # note: dnf install eigen3-devel (Fedora linux)
   find_package(Eigen3 CONFIG REQUIRED) 
-  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_EIGEN) 
-  target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen) 
+  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_EIGEN) 
+  target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen) 
 
 elseif(USE_ARMADILLO) #note: dnf install armadillo-devel
   find_package(Armadillo REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_ARMADILLO) 
-  target_include_directories(${PROJECT_NAME} PRIVATE ${ARMADILLO_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${ARMADILLO_LIBRARIES}) 
+  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_ARMADILLO) 
+  target_include_directories(${PROJECT_NAME} PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${ARMADILLO_LIBRARIES}) 
 endif() 
 
 
@@ -102,7 +102,7 @@ if (FFTTOOLS_ENABLE_OPENMP AND FFTTOOLS_ENABLE_THREAD_SAFE)
   message(FATAL_ERROR "FFTTOOLS_ENABLE_THREAD_SAFE and FFTTOOLS_ENABLE_OPENMP are mutually exclusive")
 
 elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_THREAD_SAFE)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux at least)
   find_package(OpenMP REQUIRED)
@@ -119,14 +119,14 @@ option(
    OFF
 )
 if(FORCE_OLD_GPP_ABI)
-  target_compile_options(${PROJECT_NAME} PRIVATE -D_GLIBCXX_USE_CXX11_ABI=0)
+  target_compile_options(${PROJECT_NAME} PUBLIC -D_GLIBCXX_USE_CXX11_ABI=0)
 endif() 
 
 
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
   if (${option_name}) 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE ${option_name} )
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ${option_name} )
   endif()
 endmacro() 
 
@@ -171,7 +171,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
 target_link_options(${PROJECT_NAME} PUBLIC "-g")
 
 # TODO: do we really need to link all of the ROOT libraries?
-target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 # target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 set(DICTNAME G__${PROJECT_NAME})
@@ -225,25 +225,11 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 if(FFTTOOLS_ENABLE_OPENMP) 
   add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
-  target_include_directories(testOpenMP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(testOpenMP 
-    PRIVATE ${ROOT_LIBRARIES} 
-            ${FFTW_LIBRARIES} 
-            ${PROJECT_NAME}
-  )
+  target_link_libraries(testOpenMP ${PROJECT_NAME})
 endif() 
 
 set(BINLIST testFFTtools testSubtract)
 foreach(b IN LISTS BINLIST) 
-  add_executable(${b}
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx"
-  ) 
-  target_include_directories(${b} 
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(${b} 
-    PRIVATE ${ROOT_LIBRARIES} 
-            ${FFTW_LIBRARIES} 
-            ${PROJECT_NAME}
-  )
+  add_executable(${b} "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx") 
+  target_link_libraries(${b} ${PROJECT_NAME})
 endforeach()
