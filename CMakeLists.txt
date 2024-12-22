@@ -24,7 +24,6 @@ if(NOT WIN32)
   set(BoldBlue    "${Esc}[1;34m")
 endif()
 
-
 find_package(ROOT CONFIG REQUIRED COMPONENTS MathMore MathCore RIO Hist Tree Net Minuit Spectrum Minuit2)
 message(STATUS "${BoldGreen}Found ROOT ${ROOT_VERSION}${ColourReset}")
 message(STATUS "${BoldGreen}ROOT_INCLUDE_DIRS is set to ${ROOT_INCLUDE_DIRS}${ColourReset}")
@@ -65,7 +64,6 @@ if(VECTORIZE)
   endif() 
 endif() 
 
-
 ##  Linear algebra options 
 option(USE_EIGEN "Use Eigen3 for certain linear algebra options" OFF) 
 option(USE_ARMADILLO "Use Armadillo for certain linear algebra options" OFF) 
@@ -84,7 +82,6 @@ elseif(USE_ARMADILLO) #note: dnf install armadillo-devel
   target_include_directories(${PROJECT_NAME} PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} PUBLIC ${ARMADILLO_LIBRARIES}) 
 endif() 
-
 
 ## Multithread options 
 option(
@@ -109,7 +106,6 @@ elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux
   target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 endif()
-
 
 ## API compatibility
 option(
@@ -156,10 +152,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME}
   PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
-          $<INSTALL_INTERFACE:include>
-          $<INSTALL_INTERFACE:include/vectorclass>
-  PRIVATE $<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>
           $<BUILD_INTERFACE:${FFTW_INCLUDES}>
+          $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+          $<INSTALL_INTERFACE:include/${PROJECT_NAME}/vectorclass>
 )
 
 # Propagating these C/C++ compiler flags to downstream projects when they link against this library
@@ -172,7 +167,7 @@ target_link_options(${PROJECT_NAME} PUBLIC "-g")
 
 # TODO: do we really need to link all of the ROOT libraries?
 target_link_libraries(${PROJECT_NAME} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
-# target_link_libraries(${compatlibname} ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
+# target_link_libraries(${compatlibname} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 set(DICTNAME G__${PROJECT_NAME})
 # set(DICTNAMECOMPAT G__${compatlibname})
@@ -186,9 +181,9 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #================================================================================================
 
 # installing headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-                              # note: this trailing "/" is important, otherwise install dir will have a weird "includes/includes" structure
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
+install(FILES ${HEADER_FILES} DESTINATION include/${PROJECT_NAME})
+
 # Config files and such
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
