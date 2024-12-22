@@ -102,11 +102,11 @@ if (FFTTOOLS_ENABLE_OPENMP AND FFTTOOLS_ENABLE_THREAD_SAFE)
   message(FATAL_ERROR "FFTTOOLS_ENABLE_THREAD_SAFE and FFTTOOLS_ENABLE_OPENMP are mutually exclusive")
 
 elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
-  target_compile_options(${PROJECT_NAME} PRIVATE -DFFTTOOLS_THREAD_SAFE)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)  # TODO OpenMP currently broken (for Fedora Linux at least)
   find_package(OpenMP REQUIRED)
-  target_compile_options(${PROJECT_NAME} PRIVATE -DFFTTOOLS_USE_OMP ${OpenMP_CXX_FLAGS})
+  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_USE_OMP ${OpenMP_CXX_FLAGS})
 endif()
 
 
@@ -125,7 +125,7 @@ endif()
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
   if (${option_name}) 
-    target_compile_options(${PROJECT_NAME} PRIVATE -D${option_name} )
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ${option_name} )
   endif()
 endmacro() 
 
