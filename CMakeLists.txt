@@ -46,7 +46,7 @@ message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourRese
 option(VECTORIZE "Enable Manual SIMD Vectorization" ON) 
 # This option is defined in pueoBuilder, default on here but off there
 if(VECTORIZE)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE -DENABLE_VECTORIZE ) 
+  target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_VECTORIZE ) 
 
   # TODO someone should do this for clang if they want it to be as fast as possible 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
@@ -73,14 +73,16 @@ option(USE_ARMADILLO "Use Armadillo for certain linear algebra options" OFF)
 if (USE_EIGEN AND USE_ARMADILLO) 
   message(FATAL_ERROR "USE_EIGEN and USE_ARMADILLO are mutually exclusive") 
 
-elseif(USE_EIGEN) 
-  set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3") # TODO maybe don't hardcode this
-  target_compile_options(${PROJECT_NAME} PRIVATE -DUSE_EIGEN) 
-  target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR}) 
+elseif(USE_EIGEN) # note: dnf install eigen3-devel (Fedora linux)
+  find_package(Eigen3 CONFIG REQUIRED) 
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_EIGEN) 
+  target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen) 
 
-elseif(USE_ARMADILLO) # TODO this only works if armadillo is in standard path
-  target_compile_options(${PROJECT_NAME} PRIVATE -DUSE_ARMADILLO) 
-  target_link_libraries(${PROJECT_NAME} PRIVATE armadillo) 
+elseif(USE_ARMADILLO) #note: dnf install armadillo-devel
+  find_package(Armadillo REQUIRED)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_ARMADILLO) 
+  target_include_directories(${PROJECT_NAME} PRIVATE ${ARMADILLO_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${ARMADILLO_LIBRARIES}) 
 endif() 
 
 
