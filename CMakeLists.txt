@@ -72,14 +72,14 @@ if (USE_EIGEN AND USE_ARMADILLO)
 
 elseif(USE_EIGEN) # note: dnf install eigen3-devel (Fedora linux)
   find_package(Eigen3 CONFIG REQUIRED) 
-  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_EIGEN) 
-  target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen) 
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_EIGEN) 
+  target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen) 
 
 elseif(USE_ARMADILLO) #note: dnf install armadillo-devel
   find_package(Armadillo REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC USE_ARMADILLO) 
-  target_include_directories(${PROJECT_NAME} PUBLIC ${ARMADILLO_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${ARMADILLO_LIBRARIES}) 
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_ARMADILLO) 
+  target_include_directories(${PROJECT_NAME} PRIVATE ${ARMADILLO_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${ARMADILLO_LIBRARIES}) 
 endif() 
 
 ## Multithread options 
@@ -98,12 +98,12 @@ if (FFTTOOLS_ENABLE_OPENMP AND FFTTOOLS_ENABLE_THREAD_SAFE)
   message(FATAL_ERROR "FFTTOOLS_ENABLE_THREAD_SAFE and FFTTOOLS_ENABLE_OPENMP are mutually exclusive")
 
 elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_THREAD_SAFE)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
-  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_USE_OMP)
+  target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 ## API compatibility
@@ -121,7 +121,7 @@ endif()
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
   if (${option_name}) 
-    target_compile_definitions(${PROJECT_NAME} PUBLIC ${option_name} )
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ${option_name} )
   endif()
 endmacro() 
 
@@ -156,12 +156,12 @@ target_include_directories(${PROJECT_NAME}
           $<INSTALL_INTERFACE:include/${PROJECT_NAME}/vectorclass>
 )
 
-# Propagating these C/C++ compiler flags to downstream projects when they link against this library
-target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
+# only use warning flags in debug mode
+target_compile_options(${PROJECT_NAME} PRIVATE 
+  $<$<CONFIG:Debug>:-Wall -Wextra>
+  "-Os"
+)
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
-
-# Propagating this linker option to downstream projects when they link against this library
-target_link_options(${PROJECT_NAME} PUBLIC "-g")
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${FFTW_LIBRARIES} 
                                       PRIVATE  ROOT::FitPanel
