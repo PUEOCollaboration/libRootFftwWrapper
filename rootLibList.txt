@@ -1,0 +1,57 @@
+ROOT::Physics
+
+  libCore
+    TError
+    TStyle
+    TStopwatch
+    TObject
+    TString
+    TROOT
+    TSystem
+
+  libMatrix
+    TMatrixD
+    TVectorD
+    TDecompLU
+    TDecomQRH
+    TDecompSparse
+
+  libMathCore
+    TRandom
+    TMath
+
+  Thread
+    TMutex
+    TThread
+
+ROOT::Gpad
+
+  TCanvas
+
+  libGraf
+    TGraph
+    TEllipse
+
+  libHist
+    TGraphErrors
+    TH2
+    TF1
+    TAxis
+
+ROOT::MathMore
+  Math/Polynomial
+  Math/Interpolator
+  Math/InterpolationTypes
+
+ROOT::Tree
+  TTree
+  TEventList
+
+ROOT::Spectrum
+  TSpectrum.h
+
+ROOT::Minuit
+  TLinearFilter
+
+ROOT::Minuit2
+  Minuit2
