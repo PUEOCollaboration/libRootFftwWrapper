@@ -1,7 +1,7 @@
 ROOT::Physics
 
   libCore
-    TError
+    TError (probably)
     TStyle
     TStopwatch
     TObject
@@ -10,8 +10,8 @@ ROOT::Physics
     TSystem
 
   libMatrix
-    TMatrixD
-    TVectorD
+    TMatrixD (probably)
+    TVectorD (probably)
     TDecompLU
     TDecomQRH
     TDecompSparse
@@ -20,19 +20,20 @@ ROOT::Physics
     TRandom
     TMath
 
-  Thread
+  libThread
     TMutex
     TThread
 
 ROOT::Gpad
 
-  TCanvas
+  libGpad
+    TCanvas
 
   libGraf
-    TGraph
     TEllipse
 
   libHist
+    TGraph
     TGraphErrors
     TH2
     TF1
@@ -54,4 +55,4 @@ ROOT::Minuit
   TLinearFilter
 
 ROOT::Minuit2
-  Minuit2
+  Minuit2/Minuit2Minimizer
