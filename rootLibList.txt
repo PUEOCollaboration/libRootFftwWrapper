@@ -1,5 +1,4 @@
-ROOT::Physics
-
+ROOT::FitPanel
   libCore
     TError (probably)
     TStyle
@@ -24,8 +23,6 @@ ROOT::Physics
     TMutex
     TThread
 
-ROOT::Gpad
-
   libGpad
     TCanvas
 
@@ -39,14 +36,14 @@ ROOT::Gpad
     TF1
     TAxis
 
+  libTree
+    TTree
+    TEventList
+
 ROOT::MathMore
   Math/Polynomial
   Math/Interpolator
   Math/InterpolationTypes
-
-ROOT::Tree
-  TTree
-  TEventList
 
 ROOT::Spectrum
   TSpectrum.h

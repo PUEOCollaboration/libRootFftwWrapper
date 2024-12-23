@@ -24,7 +24,7 @@ if(NOT WIN32)
   set(BoldBlue    "${Esc}[1;34m")
 endif()
 
-find_package(ROOT CONFIG REQUIRED COMPONENTS Physics Gpad MathMore Tree Spectrum Minuit Minuit2)
+find_package(ROOT CONFIG REQUIRED COMPONENTS FitPanel MathMore Spectrum Minuit Minuit2)
 
 if( ${ROOT_VERSION} VERSION_LESS "6.16")
   message(FATAL_ERROR "Please update ROOT to at least 6.16")
@@ -164,13 +164,11 @@ target_compile_options(${PROJECT_NAME} PUBLIC "-Os" "-g" "-Wall" "-Wextra")
 target_link_options(${PROJECT_NAME} PUBLIC "-g")
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${FFTW_LIBRARIES} 
-                                                ROOT::Physics   
-                                                ROOT::Gpad     
-                                                ROOT::MathMore  
-                                                ROOT::Tree    
-                                                ROOT::Spectrum  
-                                                ROOT::Minuit    
-                                                ROOT::Minuit2)
+                                      PRIVATE  ROOT::FitPanel
+                                               ROOT::MathMore  
+                                               ROOT::Spectrum  
+                                               ROOT::Minuit    
+                                               ROOT::Minuit2)
 # target_link_libraries(${compatlibname} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 set(DICTNAME G__${PROJECT_NAME})
@@ -224,11 +222,21 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 if(FFTTOOLS_ENABLE_OPENMP) 
   add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
-  target_link_libraries(testOpenMP ${PROJECT_NAME})
+  target_link_libraries(testOpenMP ${PROJECT_NAME}
+                                     ROOT::FitPanel
+                                     ROOT::MathMore  
+                                     ROOT::Spectrum  
+                                     ROOT::Minuit    
+                                     ROOT::Minuit2)
 endif() 
 
 set(BINLIST testFFTtools testSubtract)
 foreach(b IN LISTS BINLIST) 
   add_executable(${b} "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx") 
-  target_link_libraries(${b} ${PROJECT_NAME})
+  target_link_libraries(${b} ${PROJECT_NAME}
+                               ROOT::FitPanel
+                               ROOT::MathMore  
+                               ROOT::Spectrum  
+                               ROOT::Minuit    
+                               ROOT::Minuit2)
 endforeach()
