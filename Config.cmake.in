@@ -4,3 +4,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/RootFftwWrapperTargets.cmake")
 
 check_required_components(RootFftwWrapper)
 
+include(CMakeFindDependencyMacro)
+find_dependency(FFTW REQUIRED)
+find_dependency(ROOT CONFIG REQUIRED COMPONENTS FitPanel MathMore Spectrum Minuit Minuit2)
+
+# TODO Handle find_dependency(...) for optionally included packages

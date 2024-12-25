@@ -214,6 +214,7 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATIO
 # installing the target file
 install(EXPORT ${PROJECT_NAME}Targets
     FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE RootFftwWrapper::
     DESTINATION lib/cmake/${PROJECT_NAME})
 
 #================================================================================================
