@@ -152,8 +152,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}/vectorclass>)
 endif()
 
 # only use warning flags in debug mode
@@ -177,10 +177,11 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #================================================================================================
 #                                       INSTALLING
 #================================================================================================
-
-# installing headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
-install(FILES ${HEADER_FILES} DESTINATION include/${PROJECT_NAME})
+                                   # note: trailing "/" is important
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
+if(VECTORIZE)
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
+endif()
 
 # Config files and such
 include(GNUInstallDirs)
