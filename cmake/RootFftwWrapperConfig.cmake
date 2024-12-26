@@ -1,8 +1,4 @@
-@PACKAGE_INIT@
-
 include("${CMAKE_CURRENT_LIST_DIR}/RootFftwWrapperTargets.cmake")
-
-check_required_components(RootFftwWrapper)
 
 include(CMakeFindDependencyMacro)
 # find_dependency(FFTW REQUIRED) # TODO CONFIG MODE???
