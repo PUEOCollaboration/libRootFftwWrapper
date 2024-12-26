@@ -12,7 +12,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 #================================================================================================
 if(NOT CMAKE_BUILD_TYPE) 
   set(CMAKE_BUILD_TYPE Default
-    CACHE STRING "Choose tye type of build: None Debug Release RelWithDebInfo MinSizeRel Default"
+    CACHE STRING "Choose tye type of build: Debug or Default"
     FORCE) 
 endif()
 
@@ -34,7 +34,6 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
 message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourReset}")
-
 
 #================================================================================================
 #                                       OPTIONS
@@ -117,7 +116,6 @@ if(FORCE_OLD_GPP_ABI)
   target_compile_options(${PROJECT_NAME} PUBLIC -D_GLIBCXX_USE_CXX11_ABI=0)
 endif() 
 
-
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
   if (${option_name}) 
@@ -136,7 +134,6 @@ mark_as_advanced(SINE_SUBTRACT_PROFILE)
 stupid_option(FFTW_USE_PATIENT  "Use FFTW Patient plans... not recommended unless you are good about saving wisdom")
 mark_as_advanced(FFTW_USE_PATIENT) 
 
-
 #================================================================================================
 #                                       BUILDING
 #================================================================================================
@@ -148,13 +145,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR})
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
-          $<BUILD_INTERFACE:${FFTW_INCLUDES}>
-          $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-          $<INSTALL_INTERFACE:include/${PROJECT_NAME}/vectorclass>
-)
+target_include_directories(${PROJECT_NAME} PUBLIC  
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
+  $<BUILD_INTERFACE:${FFTW_INCLUDES}>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+
+if(VECTORIZE)
+  target_include_directories(${PROJECT_NAME} PUBLIC  
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+endif()
 
 # only use warning flags in debug mode
 target_compile_options(${PROJECT_NAME} PRIVATE 
@@ -163,12 +163,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 )
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${FFTW_LIBRARIES} 
-                                      PRIVATE  ROOT::FitPanel
-                                               ROOT::MathMore  
-                                               ROOT::Spectrum  
-                                               ROOT::Minuit    
-                                               ROOT::Minuit2)
+target_link_libraries(${PROJECT_NAME} 
+  PUBLIC ${FFTW_LIBRARIES} 
+  PRIVATE  ROOT::FitPanel ROOT::MathMore  ROOT::Spectrum  ROOT::Minuit ROOT::Minuit2)
 # target_link_libraries(${compatlibname} PUBLIC ${ROOT_LIBRARIES} ${FFTW_LIBRARIES} )
 
 set(DICTNAME G__${PROJECT_NAME})
@@ -176,7 +173,6 @@ set(DICTNAME G__${PROJECT_NAME})
 
 root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF LinkDef.h OPTIONS ${DICTIONARY_OPTIONS})
 # root_generate_dictionary(${DICTNAMECOMPAT} ${COMPAT_HEADER_FILES} MODULE ${compatlibname} LINKDEF LinkDef.h OPTIONS -DFFTTOOLS_COMPAT_MODE)
-
 
 #================================================================================================
 #                                       INSTALLING
@@ -219,20 +215,12 @@ install(EXPORT ${PROJECT_NAME}Targets
 if(FFTTOOLS_ENABLE_OPENMP) 
   add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
   target_link_libraries(testOpenMP ${PROJECT_NAME}
-                                     ROOT::FitPanel
-                                     ROOT::MathMore  
-                                     ROOT::Spectrum  
-                                     ROOT::Minuit    
-                                     ROOT::Minuit2)
+    ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 endif() 
 
 set(BINLIST testFFTtools testSubtract)
 foreach(b IN LISTS BINLIST) 
   add_executable(${b} "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx") 
   target_link_libraries(${b} ${PROJECT_NAME}
-                               ROOT::FitPanel
-                               ROOT::MathMore  
-                               ROOT::Spectrum  
-                               ROOT::Minuit    
-                               ROOT::Minuit2)
+    ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 endforeach()
