@@ -150,10 +150,12 @@ if(VECTORIZE)
 endif()
 
 # only use warning flags in debug mode
-target_compile_options(${PROJECT_NAME} PRIVATE 
-  $<$<CONFIG:Debug>:-Wall -Wextra>
-  "-Os"
-)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-Wall -Wextra>)
+
+# Transform ROOT_CXX_FLAGS into a list of individual flags, and add them to the compilation command
+separate_arguments( ROOT_CXX_FLAGS_LIST UNIX_COMMAND ${ROOT_CXX_FLAGS})
+target_compile_options(${PROJECT_NAME} PUBLIC ${ROOT_CXX_FLAGS_LIST})
+
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
 target_link_libraries(${PROJECT_NAME} 
