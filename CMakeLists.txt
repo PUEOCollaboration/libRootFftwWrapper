@@ -38,27 +38,20 @@ message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourRese
 #================================================================================================
 #                                       OPTIONS
 #================================================================================================
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NATIVE_ARCH AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1) 
+  target_compile_options(${PROJECT_NAME} PUBLIC -march=native)
+endif() 
 
-## Manual vectorization option; maybe in the future this can be made a CMake module or something 
-option(VECTORIZE "Enable Manual SIMD Vectorization" ON) 
-# This option is defined in pueoBuilder, default on here but off there
+# Use VCL (header files in vectorclass) written by Agner Fog for performance gain.
+option(VECTORIZE "Enable Manual SIMD Vectorization. This will install the header files in vectorclass as well" ON) 
+
 if(VECTORIZE)
   target_compile_definitions(${PROJECT_NAME} PUBLIC ENABLE_VECTORIZE ) 
-
-  # TODO someone should do this for clang if they want it to be as fast as possible 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1)
-      if(NATIVE_ARCH) # defined in pueoBuilder, default on
-        target_compile_options(${PROJECT_NAME} PUBLIC -march=native)
-      endif()
-    endif()
-
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-      # Vectorize docs...
-      # If you are using the Gnu compiler version 3.x or 4.x then you must
-      # set the ABI version to 4 or more, or 0 for a reasonable default
-      target_compile_options(${PROJECT_NAME} PUBLIC -fabi-version=0)
-    endif()
+  # From VCL documentation:
+  #   If you are using the Gnu compiler version 3.x or 4.x then you must
+  #   set the ABI version to 4 or more, or 0 for a reasonable default
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+    target_compile_options(${PROJECT_NAME} PUBLIC -fabi-version=0)
   endif() 
 endif() 
 
