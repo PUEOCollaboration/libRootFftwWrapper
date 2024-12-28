@@ -117,15 +117,15 @@ macro(stupid_option option_name option_description)
 endmacro() 
 
 ## Random Sine Subtraction options
-stupid_option(SINE_SUBTRACT_USE_FLOATS  "Use floats for vectorized sine subtraction") 
-mark_as_advanced(SINE_SUBTRACT_USE_FLOATS)
+# stupid_option(SINE_SUBTRACT_USE_FLOATS  "Use floats for vectorized sine subtraction") 
+# mark_as_advanced(SINE_SUBTRACT_USE_FLOATS)
 
-stupid_option(SINE_SUBTRACT_PROFILE  "Enable Sine Subtraction profiling (you probably don't want to do this)") 
-mark_as_advanced(SINE_SUBTRACT_PROFILE)
+# stupid_option(SINE_SUBTRACT_PROFILE  "Enable Sine Subtraction profiling (you probably don't want to do this)") 
+# mark_as_advanced(SINE_SUBTRACT_PROFILE)
 
 ## Miscellaneous options
-stupid_option(FFTW_USE_PATIENT  "Use FFTW Patient plans... not recommended unless you are good about saving wisdom")
-mark_as_advanced(FFTW_USE_PATIENT) 
+# stupid_option(FFTW_USE_PATIENT  "Use FFTW Patient plans... not recommended unless you are good about saving wisdom")
+# mark_as_advanced(FFTW_USE_PATIENT) 
 
 #================================================================================================
 #                                       BUILDING
@@ -210,13 +210,13 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 if(FFTTOOLS_ENABLE_OPENMP) 
   add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
-  target_link_libraries(testOpenMP ${PROJECT_NAME}
-    ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
+  target_link_libraries(testOpenMP 
+    PRIVATE ${PROJECT_NAME} ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 endif() 
 
 set(BINLIST testFFTtools testSubtract)
 foreach(b IN LISTS BINLIST) 
   add_executable(${b} "${CMAKE_CURRENT_SOURCE_DIR}/test/${b}.cxx") 
-  target_link_libraries(${b} ${PROJECT_NAME}
-    ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
+  target_link_libraries(${b} 
+    PRIVATE ${PROJECT_NAME} ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 endforeach()
