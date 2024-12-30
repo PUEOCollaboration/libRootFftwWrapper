@@ -8,16 +8,16 @@ ROOT::FitPanel
     TROOT
     TSystem
 
-  libMatrix
-    TMatrixD (probably)
+  libMatrix (https://github.com/cxx-hep/root-cern/blob/master/docbook/users-guide/LinearAlgebra.md)
+    TMatrixD
     TVectorD (probably)
     TDecompLU
-    TDecomQRH
+    TDecompQRH
     TDecompSparse
 
   libMathCore
     TRandom
-    TMath
+    TMath (probably, but either libMathCore or libCore)
 
   libThread
     TMutex
@@ -49,7 +49,7 @@ ROOT::Spectrum
   TSpectrum.h
 
 ROOT::Minuit
-  TLinearFilter
+  TLinearFitter
 
 ROOT::Minuit2
   Minuit2/Minuit2Minimizer
