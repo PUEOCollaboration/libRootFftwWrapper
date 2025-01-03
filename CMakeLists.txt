@@ -180,8 +180,11 @@ if(VECTORIZE)
 endif()
 
 file(GLOB FFTW_HEADERS "${FFTW_INCLUDES}/fftw3*")
-message(${FFTW_HEADERS})
+# installing the fftw3 header files, in case downstream projects forget to use the FindFFTW.cmake module
 install(FILES ${FFTW_HEADERS} DESTINATION include/${PROJECT_NAME}/fftw)
+# installing the FindFFTW.cmake module
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/FindFFTW.cmake
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/modules)
 
 # Config files and such
 include(GNUInstallDirs)
