@@ -141,7 +141,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PUBLIC  
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
   $<BUILD_INTERFACE:${FFTW_INCLUDES}>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}/fftw>)
 
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
@@ -177,6 +178,10 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PRO
 if(VECTORIZE)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
 endif()
+
+file(GLOB FFTW_HEADERS "${FFTW_INCLUDES}/fftw3*")
+message(${FFTW_HEADERS})
+install(FILES ${FFTW_HEADERS} DESTINATION include/${PROJECT_NAME}/fftw)
 
 # Config files and such
 include(GNUInstallDirs)
