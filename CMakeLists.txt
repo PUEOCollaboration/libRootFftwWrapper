@@ -131,24 +131,15 @@ endmacro()
 #================================================================================================
 #                                       CERN ROOT FLAGS
 #================================================================================================
-# Next, explicitly handle the flags in $ROOT_CXX_FLAGS. This differs between platforms, and I've found
-# that the $ROOT_CXX_FLAGS leads to seg fault downstream on macOS (M1, inside Docker Fedora 41)
-# Hence, I'm only considering flags from $ROOT_CXX_FLAGS found on midway: -std=c++17, -pthread, -fsigned-char and -pipe
+# change log: https://github.com/PUEOCollaboration/libRootFftwWrapper/pull/1
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_${ROOT_CXX_STANDARD})
-# note that the flag -std=cxx_std_* may be omitted by CMake if requested standard < default standard
-# see (https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support)
-
-## pretty sure pthread is not actually needed (plus there is ROOT::Thread already).
-## In any case it seems like the linker command against pthread is optimized out anyways.
-## https://cmake.org/cmake/help/latest/module/FindThreads.html
-## Modern CMake and pthread: https://stackoverflow.com/a/29871891/21955752
-# set(THREADS_PREFER_PTHREAD_FLAG ON)
-# find_package(Threads REQUIRED)
-# target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+# pretty sure pthread is not actually needed, but I guess it doesn't hurt to keep this
+set(THREADS_PREFER_PTHREAD_FLAG ON) # CMake Doc: https://cmake.org/cmake/help/latest/module/FindThreads.html
+find_package(Threads REQUIRED) 	    # Usage:     https://stackoverflow.com/a/29871891/21955752
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 
 target_compile_options(${PROJECT_NAME} PUBLIC -pipe)
-target_compile_options(${PROJECT_NAME} PUBLIC -fsigned-char) # without this flag pueoSim segfaults
+target_compile_options(${PROJECT_NAME} PUBLIC -fsigned-char) # without this flag pueoSim segfaults (on mac)
 #================================================================================================
 #                                       BUILDING
 #================================================================================================
