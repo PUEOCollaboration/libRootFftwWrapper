@@ -127,6 +127,28 @@ endmacro()
 # stupid_option(FFTW_USE_PATIENT  "Use FFTW Patient plans... not recommended unless you are good about saving wisdom")
 # mark_as_advanced(FFTW_USE_PATIENT) 
 
+
+#================================================================================================
+#                                       CERN ROOT FLAGS
+#================================================================================================
+# Next, explicitly handle the flags in $ROOT_CXX_FLAGS. This differs between platforms, and I've found
+# that the $ROOT_CXX_FLAGS leads to seg fault downstream on macOS (M1, inside Docker Fedora 41)
+# Hence, I'm only considering flags from $ROOT_CXX_FLAGS found on midway: -std=c++17, -pthread, -fsigned-char and -pipe
+
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_${ROOT_CXX_STANDARD})
+# note that the flag -std=cxx_std_* may be omitted by CMake if requested standard < default standard
+# see (https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support)
+
+## pretty sure pthread is not actually needed (plus there is ROOT::Thread already).
+## In any case it seems like the linker command against pthread is optimized out anyways.
+## https://cmake.org/cmake/help/latest/module/FindThreads.html
+## Modern CMake and pthread: https://stackoverflow.com/a/29871891/21955752
+# set(THREADS_PREFER_PTHREAD_FLAG ON)
+# find_package(Threads REQUIRED)
+# target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+
+target_compile_options(${PROJECT_NAME} PUBLIC -pipe)
+target_compile_options(${PROJECT_NAME} PUBLIC -fsigned-char) # without this flag pueoSim segfaults
 #================================================================================================
 #                                       BUILDING
 #================================================================================================
@@ -152,11 +174,6 @@ endif()
 
 # only use warning flags in debug mode
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-Wall -Wextra>)
-
-# Transform ROOT_CXX_FLAGS into a list of individual flags, and add them to the compilation command
-# TODO: Figure out why this can't be in RootFftwWrapper, even though that was intended
-# separate_arguments( ROOT_CXX_FLAGS_LIST UNIX_COMMAND ${ROOT_CXX_FLAGS})
-# target_compile_options(${PROJECT_NAME} PUBLIC ${ROOT_CXX_FLAGS_LIST})
 
 # target_compile_definitions(${compatlibname} PUBLIC FFTTOOLS_COMPAT_MODE) 
 
