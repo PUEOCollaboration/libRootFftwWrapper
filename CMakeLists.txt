@@ -137,7 +137,7 @@ endmacro()
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/getRootStandard.cmake)
 # setting C++ standard (https://cliutils.gitlab.io/modern-cmake/chapters/features/cpp11.html)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_${ROOT_CXX_STANDARD})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF) # turns -std=gnu++17 -> -std=c++17
 # note that the flag -std=cxx_std_* may be omitted by CMake if requested standard < default standard
 # see (https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support)
 
