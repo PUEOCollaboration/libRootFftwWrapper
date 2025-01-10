@@ -133,6 +133,14 @@ endmacro()
 #================================================================================================
 # change log: https://github.com/PUEOCollaboration/libRootFftwWrapper/pull/1
 
+# obtain the C++ standard that ROOT is compiled with
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/getRootStandard.cmake)
+# setting C++ standard (https://cliutils.gitlab.io/modern-cmake/chapters/features/cpp11.html)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_${ROOT_CXX_STANDARD})
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
+# note that the flag -std=cxx_std_* may be omitted by CMake if requested standard < default standard
+# see (https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support)
+
 # pretty sure pthread is not actually needed, but I guess it doesn't hurt to keep this
 set(THREADS_PREFER_PTHREAD_FLAG ON) # CMake Doc: https://cmake.org/cmake/help/latest/module/FindThreads.html
 find_package(Threads REQUIRED) 	    # Usage:     https://stackoverflow.com/a/29871891/21955752
