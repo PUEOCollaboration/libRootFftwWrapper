@@ -1,0 +1,55 @@
+ROOT::FitPanel
+  libCore
+    TError (probably)
+    TStyle
+    TStopwatch
+    TObject
+    TString
+    TROOT
+    TSystem
+
+  libMatrix (https://github.com/cxx-hep/root-cern/blob/master/docbook/users-guide/LinearAlgebra.md)
+    TMatrixD
+    TVectorD (probably)
+    TDecompLU
+    TDecompQRH
+    TDecompSparse
+
+  libMathCore
+    TRandom
+    TMath (probably, but either libMathCore or libCore)
+
+  libThread
+    TMutex
+    TThread
+
+  libGpad
+    TCanvas
+
+  libGraf
+    TEllipse
+
+  libHist
+    TGraph
+    TGraphErrors
+    TH2
+    TF1
+    TAxis
+
+  libTree
+    TTree
+    TEventList
+
+ROOT::MathMore
+  Math/Polynomial
+  Math/Interpolator
+  Math/InterpolationTypes
+
+ROOT::Spectrum
+  TSpectrum.h
+
+ROOT::Minuit
+  TLinearFitter
+
+ROOT::Minuit2
+  Minuit2/Minuit2Minimizer
