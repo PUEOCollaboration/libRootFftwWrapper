@@ -163,7 +163,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
   $<BUILD_INTERFACE:${FFTW_INCLUDES}>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}/fftw>)
 
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
@@ -196,9 +195,6 @@ if(VECTORIZE)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
 endif()
 
-file(GLOB FFTW_HEADERS "${FFTW_INCLUDES}/fftw3*")
-# installing the fftw3 header files, in case downstream projects forget to use the FindFFTW.cmake module
-install(FILES ${FFTW_HEADERS} DESTINATION include/${PROJECT_NAME}/fftw)
 # installing the FindFFTW.cmake module
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/FindFFTW.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/modules)
