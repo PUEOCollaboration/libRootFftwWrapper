@@ -195,4 +195,3 @@ function(REFLEX_GENERATE_DICTIONARY dictionary)
                              --gccxmlpath=${gccxmlpath} ${ARG_OPTIONS} ${includedirs} ${definitions}
                      DEPENDS ${headerfiles} ${selectionfile})
 endfunction()
-
