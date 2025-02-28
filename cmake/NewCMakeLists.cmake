@@ -12,16 +12,8 @@ add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 #================================================================================================
 if(NOT CMAKE_BUILD_TYPE) 
   set(CMAKE_BUILD_TYPE Default
-    CACHE STRING "Choose tye type of build: Debug or Default"
+    CACHE STRING "Choose the build type: Debug or Default"
     FORCE) 
-endif()
-
-if(NOT WIN32)
-  string(ASCII 27 Esc)
-  set(ColourReset "${Esc}[m")
-  set(BoldGreen   "${Esc}[1;32m")
-  set(BoldYellow  "${Esc}[1;33m")
-  set(BoldBlue    "${Esc}[1;34m")
 endif()
 
 find_package(ROOT CONFIG REQUIRED COMPONENTS FitPanel MathMore Spectrum Minuit Minuit2)
@@ -33,7 +25,7 @@ endif()
 # TODO: FFTW didn't ship with a finder?
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 find_package(FFTW REQUIRED)
-message(STATUS "${BoldGreen}FFTW_INCLUDES is set to ${FFTW_INCLUDES}${ColourReset}")
+message(STATUS "FFTW_INCLUDES is set to ${FFTW_INCLUDES}")
 
 #================================================================================================
 #                                       OPTIONS
