@@ -90,16 +90,6 @@ elseif(FFTTOOLS_ENABLE_OPENMP)
   target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
-## API compatibility
-option(
-  FORCE_OLD_GPP_ABI
-  "Force old g++ ABI;
-   this might be necessary if using new g++ with ROOT compiled with older g++ or other similar situations"
-   OFF
-)
-if(FORCE_OLD_GPP_ABI)
-  target_compile_options(${PROJECT_NAME} PUBLIC -D_GLIBCXX_USE_CXX11_ABI=0)
-endif() 
 
 macro(stupid_option option_name option_description) 
   option (${option_name} ${option_description} OFF) 
