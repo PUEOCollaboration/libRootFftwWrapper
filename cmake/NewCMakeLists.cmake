@@ -86,8 +86,8 @@ elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
-  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_USE_OMP)
+  target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 
@@ -214,7 +214,9 @@ install(EXPORT ${PROJECT_NAME}Targets
 if(FFTTOOLS_ENABLE_OPENMP) 
   add_executable(testOpenMP "${CMAKE_CURRENT_SOURCE_DIR}/test/testOpenMP.cxx")
   target_link_libraries(testOpenMP 
-    PRIVATE ${PROJECT_NAME} ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
+    PRIVATE ${PROJECT_NAME} ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2
+            OpenMP::OpenMP_CXX          
+  )
 endif() 
 
 set(BINLIST testFFTtools testSubtract)
