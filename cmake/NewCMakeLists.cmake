@@ -3,9 +3,37 @@
 #           See the PR description: https://github.com/PUEOCollaboration/libRootFftwWrapper/pull/1
 # @note     NO LONGER BUILDING COMPAT VERSION OF libRootFftwWrapper IF YOU USE THIS FILE 
 
-
-file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
-add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+# note: do not glob files with wildcards
+set(HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/AnalyticSignal.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Averager.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/CWT.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitalFilter.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTWComplex.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTWindow.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTtools.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTtoolsRev.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFFilter.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFInterpolate.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFSignal.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/SineSubtract.h
+)
+add_library(
+  ${PROJECT_NAME} SHARED 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/AnalyticSignal.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Averager.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CWT.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DigitalFilter.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTWComplex.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTWindow.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTtools.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTtoolsRev.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Periodogram.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFFilter.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFInterpolate.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFSignal.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SineSubtract.cxx
+)
 
 #================================================================================================
 #                                       HOUSEKEEPING
@@ -133,8 +161,6 @@ target_compile_options(${PROJECT_NAME} PUBLIC -fsigned-char) # without this flag
 #================================================================================================
 #                                       BUILDING
 #================================================================================================
-
-file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
   VERSION ${PROJECT_VERSION}
