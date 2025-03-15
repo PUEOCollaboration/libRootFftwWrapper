@@ -39,9 +39,7 @@ add_library(
 #                                       HOUSEKEEPING
 #================================================================================================
 if(NOT CMAKE_BUILD_TYPE) 
-  set(CMAKE_BUILD_TYPE Default
-    CACHE STRING "Choose the build type: Debug or Default"
-    FORCE) 
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "" FORCE) 
 endif()
 
 find_package(ROOT CONFIG REQUIRED COMPONENTS FitPanel MathMore Spectrum Minuit Minuit2)
@@ -177,8 +175,8 @@ if(VECTORIZE)
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}/vectorclass>)
 endif()
 
-# only use warning flags in debug mode
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-Wall -Wextra>)
+# use warning flags in RelWithDebInfo mode, which is set to be the default mode
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:RelWithDebInfo>:-Wall -Wextra>)
 
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC ${FFTW_LIBRARIES} 
