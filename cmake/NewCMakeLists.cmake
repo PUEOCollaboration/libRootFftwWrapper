@@ -1,39 +1,10 @@
 # @file     NewCMakeLists.cmake
 # @purpose  Makes this library into a target for ease of use downstream
 #           See the PR description: https://github.com/PUEOCollaboration/libRootFftwWrapper/pull/1
-# @note     NO LONGER BUILDING COMPAT VERSION OF libRootFftwWrapper IF YOU USE THIS FILE 
+# @warning  NO LONGER BUILDING COMPAT VERSION OF libRootFftwWrapper IF YOU USE THIS FILE 
+# @note     Reference: https://blog.vito.nyc/posts/cmake-pkg/#fnref:4
 
-# note: do not glob files with wildcards
-set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/AnalyticSignal.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Averager.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/CWT.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitalFilter.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTWComplex.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTWindow.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTtools.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/FFTtoolsRev.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFFilter.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFInterpolate.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/RFSignal.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/SineSubtract.h
-)
-add_library(
-  ${PROJECT_NAME} SHARED 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/AnalyticSignal.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Averager.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/CWT.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/DigitalFilter.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTWComplex.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTWindow.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTtools.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/FFTtoolsRev.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Periodogram.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFFilter.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFInterpolate.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/RFSignal.cxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/SineSubtract.cxx
-)
+add_library(${PROJECT_NAME} SHARED)
 
 #================================================================================================
 #                                       HOUSEKEEPING
@@ -159,15 +130,45 @@ target_compile_options(${PROJECT_NAME} PUBLIC -fsigned-char) # without this flag
 #================================================================================================
 #                                       BUILDING
 #================================================================================================
-
-set_target_properties(${PROJECT_NAME} PROPERTIES 
-  VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION_MAJOR})
-
-target_include_directories(${PROJECT_NAME} PUBLIC  
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
-  $<BUILD_INTERFACE:${FFTW_INCLUDES}>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+target_sources(${PROJECT_NAME} PRIVATE
+  src/AnalyticSignal.cxx
+  src/Averager.cxx
+  src/CWT.cxx
+  src/DigitalFilter.cxx
+  src/FFTWComplex.cxx
+  src/FFTWindow.cxx
+  src/FFTtools.cxx
+  src/FFTtoolsRev.cxx
+  src/Periodogram.cxx
+  src/RFFilter.cxx
+  src/RFInterpolate.cxx
+  src/RFSignal.cxx
+  src/SineSubtract.cxx
+)
+set(HEADER_FILES
+  include/AnalyticSignal.h
+  include/Averager.h
+  include/CWT.h
+  include/DigitalFilter.h
+  include/FFTWComplex.h
+  include/FFTWindow.h
+  include/FFTtools.h
+  include/FFTtoolsRev.h
+  include/RFFilter.h
+  include/RFInterpolate.h
+  include/RFSignal.h
+  include/SineSubtract.h
+)
+target_sources(${PROJECT_NAME} PUBLIC
+  FILE_SET HEADERS
+  BASE_DIRS include ${FFTW_INCLUDES}    # <-- Everything in BASE_DIRS is available during the build
+  FILES ${HEADER_FILES}                 # <-- But only FILES will be installed
+)
+# target_include_directories(${PROJECT_NAME} PUBLIC  
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
+  # $<BUILD_INTERFACE:${FFTW_INCLUDES}>
+#   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+# )
 
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
@@ -180,7 +181,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:RelWithDebInfo>:-Wall 
 
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC ${FFTW_LIBRARIES} 
-  PRIVATE  ROOT::FitPanel ROOT::MathMore  ROOT::Spectrum  ROOT::Minuit ROOT::Minuit2)
+  PRIVATE ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 
 set(DICTNAME G__${PROJECT_NAME})
 
@@ -189,8 +190,8 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #================================================================================================
 #                                       INSTALLING
 #================================================================================================
-                                   # note: trailing "/" is important
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
+#                                    # note: trailing "/" is important
+# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
 if(VECTORIZE)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
 endif()
@@ -217,7 +218,12 @@ install(FILES
 )
 
 # installing the libraries
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets LIBRARY DESTINATION lib)
+install(
+  TARGETS ${PROJECT_NAME} 
+  EXPORT ${PROJECT_NAME}Targets 
+  LIBRARY DESTINATION lib
+  FILE_SET HEADERS
+)
 
 # installing CERN ROOT's _rdict.pcm file
 install(
