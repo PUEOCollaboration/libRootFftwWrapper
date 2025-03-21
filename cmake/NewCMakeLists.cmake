@@ -162,9 +162,10 @@ set(HEADER_FILES
 target_sources(${PROJECT_NAME} PUBLIC
   FILE_SET HEADERS
   BASE_DIRS include      # <-- Everything in BASE_DIRS is available during the build
-  FILES ${HEADER_FILES}  # <-- But only FILES will be installed
+  FILES ${HEADER_FILES}  # <-- But only FILES will be installed, although these two are currently the same
 )
 
+# gonna cheat by using generator expressions here because I don't want to list all the files in vectorclass
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vectorclass>
@@ -175,7 +176,7 @@ endif()
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:RelWithDebInfo>:-Wall -Wextra>)
 
 target_link_libraries(${PROJECT_NAME} 
-  PUBLIC ${FFTW_LIBRARIES} 
+  PRIVATE ${FFTW_LIBRARIES} 
   PRIVATE ROOT::FitPanel ROOT::MathMore ROOT::Spectrum ROOT::Minuit ROOT::Minuit2)
 
 set(DICTNAME G__${PROJECT_NAME})
@@ -185,15 +186,10 @@ root_generate_dictionary(${DICTNAME} ${HEADER_FILES} MODULE ${PROJECT_NAME} LINK
 #================================================================================================
 #                                       INSTALLING
 #================================================================================================
-#                                    # note: trailing "/" is important
-# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
+# the price of not using FILE_SET: manual installation :)
 if(VECTORIZE)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vectorclass DESTINATION include/${PROJECT_NAME})
 endif()
-
-# installing the FindFFTW.cmake module
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/FindFFTW.cmake
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/cmake/modules)
 
 # Config files and such
 include(GNUInstallDirs)
@@ -206,31 +202,32 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 # Installing these two config files
-install(FILES
+install(
+  FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-  DESTINATION "lib/cmake/${PROJECT_NAME}"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
 )
 
-# installing the libraries
+# Exporting the project as a CMake Target as well as installing the library and headers
 install(
   TARGETS ${PROJECT_NAME} 
   EXPORT ${PROJECT_NAME}Targets 
-  LIBRARY DESTINATION lib
-  FILE_SET HEADERS
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
 
 # installing CERN ROOT's _rdict.pcm file
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_rdict.pcm"
-  DESTINATION DESTINATION lib
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-# installing the target file
-install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE RootFftwWrapper::
-    DESTINATION lib/cmake/${PROJECT_NAME})
+# This will generate a Targets.cmake file and install it
+install(
+  EXPORT ${PROJECT_NAME}Targets
+  NAMESPACE RootFftwWrapper::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+)
 
 #================================================================================================
 #                                       BINARIES
