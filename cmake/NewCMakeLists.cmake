@@ -161,14 +161,9 @@ set(HEADER_FILES
 )
 target_sources(${PROJECT_NAME} PUBLIC
   FILE_SET HEADERS
-  BASE_DIRS include ${FFTW_INCLUDES}    # <-- Everything in BASE_DIRS is available during the build
-  FILES ${HEADER_FILES}                 # <-- But only FILES will be installed
+  BASE_DIRS include      # <-- Everything in BASE_DIRS is available during the build
+  FILES ${HEADER_FILES}  # <-- But only FILES will be installed
 )
-# target_include_directories(${PROJECT_NAME} PUBLIC  
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> # note: do not use quotes here, expansion leads to errors...
-  # $<BUILD_INTERFACE:${FFTW_INCLUDES}>
-#   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-# )
 
 if(VECTORIZE)
   target_include_directories(${PROJECT_NAME} PUBLIC  
