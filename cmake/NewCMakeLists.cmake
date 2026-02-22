@@ -214,6 +214,7 @@ install(
   TARGETS ${PROJECT_NAME} 
   EXPORT ${PROJECT_NAME}Targets 
   FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+  LIBRARY DESTINATION lib # force install to lib instead of letting the system choose b/w lib vs lib64
 )
 
 # installing CERN ROOT's _rdict.pcm file
