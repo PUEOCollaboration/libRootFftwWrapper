@@ -219,7 +219,7 @@ install(
 # installing CERN ROOT's _rdict.pcm file
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_rdict.pcm"
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  DESTINATION lib # force install to lib instead of letting the system choose b/w lib vs lib64
 )
 
 # This will generate a Targets.cmake file and install it
