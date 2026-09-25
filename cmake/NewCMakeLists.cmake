@@ -83,7 +83,7 @@ elseif(FFTTOOLS_ENABLE_THREAD_SAFE)
 
 elseif(FFTTOOLS_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE FFTTOOLS_USE_OMP)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC FFTTOOLS_USE_OMP)
   target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
