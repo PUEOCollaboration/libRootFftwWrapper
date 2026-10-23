@@ -218,8 +218,13 @@ install(
 )
 
 # installing CERN ROOT's _rdict.pcm file
+# Do make sure to install the .rootmap file,
+# otherwise very confusing errors can error when you run root macros. See:
+# https://root-forum.cern.ch/t/base-class-has-incomplete-type-if-i-running-from-rootscript/62827/4
 install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_rdict.pcm"
+  FILES 
+    "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_rdict.pcm"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}.rootmap"
   DESTINATION lib # force install to lib instead of letting the system choose b/w lib vs lib64
 )
 
