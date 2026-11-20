@@ -48,6 +48,7 @@ class TH2;
 
 // FFTW
 #include <complex>
+#include <vector>
 
 /*! \mainpage ROOT FFTW Wrapper
  *
@@ -761,8 +762,20 @@ FFTtools
    /*! sinc function, if |x| < eps, sinc(x) = 1 */ 
    FFTTOOLS_METHOD double sinc(double x, double eps = 0); 
  
-   FFTTOOLS_METHOD int loadWisdom(const char * file); 
-   FFTTOOLS_METHOD int saveWisdom(const char * file); 
+   FFTTOOLS_METHOD int loadWisdom(const char * file);
+   FFTTOOLS_METHOD int saveWisdom(const char * file);
+
+   /** One entry per FFT length planned by the internal plan cache (forward r2c + backward c2r pair). */
+   struct PlanCreationRecord {
+     int length;             ///< FFT length (number of real time-domain samples)
+     double planningSeconds; ///< wall time spent creating both plans for this length
+   };
+   /** Number of FFT lengths planned so far in this process (each length is planned once, then cached). */
+   FFTTOOLS_METHOD unsigned int getNumPlansCreated();
+   /** Total wall time spent in FFTW planning so far in this process. */
+   FFTTOOLS_METHOD double getTotalPlanningSeconds();
+   /** Plan creation records, in creation order, starting from index startIndex. Not thread safe. */
+   FFTTOOLS_METHOD std::vector<PlanCreationRecord> getPlanCreationRecords(unsigned int startIndex = 0);
 
 #ifndef FFTTOOLS_COMPAT_MODE
    /**

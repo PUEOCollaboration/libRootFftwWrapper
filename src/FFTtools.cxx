@@ -5,6 +5,8 @@
 #include <assert.h>
 #include "TF1.h" 
 #include <algorithm>
+#include <chrono>
+#include <vector>
 
 #ifndef __APPLE__
 #define SINCOS sincos 
@@ -186,6 +188,10 @@ TGraph *FFTtools::getInterpolatedGraphFreqDom(const TGraph *grIn, Double_t delta
 /** This caches both forward and backwards plans **/
 static std::map<int, std::pair<fftw_plan, fftw_plan> > cached_plans; //this caches both plans for a given length
 
+/** Bookkeeping of plan creation (length and planning time), for performance profiling **/
+static std::vector<FFTtools::PlanCreationRecord> plan_creation_records;
+static double total_planning_seconds = 0;
+
 
 
 /* error if you try to compile with both */ 
@@ -321,15 +327,23 @@ static fftw_plan getPlan(int len, bool forward = true)
   {
 
     //create plans
-    std::pair<fftw_plan,fftw_plan> plans; 
+    const std::chrono::steady_clock::time_point planning_start = std::chrono::steady_clock::now();
+    std::pair<fftw_plan,fftw_plan> plans;
 #ifdef FFTW_USE_PATIENT
     plans.first = fftw_plan_dft_r2c_1d(len,mem_x, mem_X, FFTW_PATIENT | FFTW_PRESERVE_INPUT);
-    plans.second = fftw_plan_dft_c2r_1d(len,mem_X, mem_x, FFTW_PATIENT); 
+    plans.second = fftw_plan_dft_c2r_1d(len,mem_X, mem_x, FFTW_PATIENT);
 #else
     plans.first = fftw_plan_dft_r2c_1d(len,mem_x, mem_X, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
-    plans.second = fftw_plan_dft_c2r_1d(len,mem_X, mem_x, FFTW_MEASURE); 
+    plans.second = fftw_plan_dft_c2r_1d(len,mem_X, mem_x, FFTW_MEASURE);
 #endif
-    cached_plans[len] = plans; 
+    cached_plans[len] = plans;
+    const double planning_seconds =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - planning_start).count();
+    FFTtools::PlanCreationRecord record;
+    record.length = len;
+    record.planningSeconds = planning_seconds;
+    plan_creation_records.push_back(record);
+    total_planning_seconds += planning_seconds;
   }
 
 #ifdef FFTOOLS_THREAD_SAFE
@@ -2944,7 +2958,29 @@ int FFTtools::loadWisdom(const char * file)
     retVal = 0;
   }
   return retVal;
-  
+
+}
+
+//___________________________________________//
+unsigned int FFTtools::getNumPlansCreated()
+{
+  return plan_creation_records.size();
+}
+
+//___________________________________________//
+double FFTtools::getTotalPlanningSeconds()
+{
+  return total_planning_seconds;
+}
+
+//___________________________________________//
+std::vector<FFTtools::PlanCreationRecord> FFTtools::getPlanCreationRecords(unsigned int startIndex)
+{
+  if (startIndex >= plan_creation_records.size()) {
+    return std::vector<FFTtools::PlanCreationRecord>();
+  }
+  return std::vector<FFTtools::PlanCreationRecord>(plan_creation_records.begin() + startIndex,
+                                                   plan_creation_records.end());
 }
 
 
